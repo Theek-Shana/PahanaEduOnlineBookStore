@@ -35,7 +35,6 @@ public class UserService {
     public void deleteUserById(int id) throws SQLException {
         userDAO.deleteUserById(id);
     }
-
     public void updateUserByAdmin(User user) throws SQLException {
         userDAO.updateUserByAdmin(user);
     }

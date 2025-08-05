@@ -16,7 +16,6 @@ public class User {
     private Timestamp createdAt;
     private String role;
     
- 
 
     // Getters and Setters.
     public int getId() { return id; }

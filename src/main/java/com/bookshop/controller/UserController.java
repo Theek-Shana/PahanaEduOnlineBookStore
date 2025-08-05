@@ -98,7 +98,7 @@ public class UserController extends HttpServlet {
                 String mobile = req.getParameter("mobile");
                 String password = req.getParameter("password");
 
-              
+             
                 User user = new User();
                 user.setId(id);
                 user.setFullname(fullname);

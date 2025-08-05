@@ -116,6 +116,7 @@
       margin-top: 0.6rem;
       user-select: none;
     }  
+    
     @media (max-width: 420px) {
       .login-container {
         padding: 2.5rem 2rem;

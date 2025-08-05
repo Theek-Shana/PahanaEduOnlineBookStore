@@ -198,7 +198,7 @@ public class UserDAO {
         }
         return null;
     }
-  
+ 
 
     public void updatePasswordByEmail(String email, String newPassword) throws SQLException {
         String sql = "UPDATE users SET password = ? WHERE email = ?";
