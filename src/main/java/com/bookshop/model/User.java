@@ -15,7 +15,7 @@ public class User {
     private String profilePhoto;
     private Timestamp createdAt;
     private String role;
-    
+   
 
     // Getters and Setters.
     public int getId() { return id; }

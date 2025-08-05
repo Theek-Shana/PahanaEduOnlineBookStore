@@ -107,7 +107,7 @@
     }
     .forgot a:hover {
       color: #4361ee;
-      text-decoration: underline;
+      text-decoration: underline; 
     }
     .error-message {
       color: #e74c3c;
