@@ -47,7 +47,7 @@
         </configuration>
       </plugin>
 
-      <!-- ✅ WAR plugin: avoids error when web.xml is present -->
+      <!-- ✅ WAR plugin: ensures WAR builds with web.xml -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
