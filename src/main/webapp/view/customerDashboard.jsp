@@ -855,7 +855,7 @@ background:
   <!-- Main Navigation -->
   <nav class="main-nav">
     <div class="nav-links">
-      <a href="<%= request.getContextPath() %>/customer/dashboard" class="nav-link">
+      <a href="<%= request.getContextPath() %>/view/customerDashboard.jsp" class="nav-link">
         <i class="fas fa-home"></i>
         <span>Home</span>
       </a>
@@ -863,14 +863,17 @@ background:
         <i class="fas fa-book"></i>
         <span>Items</span>
       </a>
-      <a href="<%= request.getContextPath() %>/customer/categories" class="nav-link">
-        <i class="fas fa-tags"></i>
-        <span>Categories</span>
-      </a>
+
       <a href="<%= request.getContextPath() %>/private-chat?customerId=<%= ((com.bookshop.model.User) session.getAttribute("user")).getId() %>" class="nav-link">
         <i class="fas fa-comments"></i>
         <span>Chat with Staff</span>
       </a>
+      
+      <a href="<%= request.getContextPath() %>/view/help.jsp" class="nav-link">
+      <i class="fas fa-question-circle"></i>
+      <span>Help</span>
+    </a>
+      
     </div>
   </nav>
 
