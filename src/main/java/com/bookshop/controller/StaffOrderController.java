@@ -233,7 +233,7 @@ public class StaffOrderController extends HttpServlet {
                 handleAddOrderItemsGet(req, resp);
                 return;
             }
-
+ 
             Order order = new Order();
             order.setUserId(customerId);
             order.setStaffId(loggedInUser.getId());

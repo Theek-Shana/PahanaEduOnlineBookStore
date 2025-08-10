@@ -25,5 +25,5 @@ public class OrderService {
 
     public boolean updateOrderStatus(int orderId, String status, String message, int staffId) throws SQLException {
         return orderDAO.updateOrderStatus(orderId, status, message, staffId);
-    }
+    } 
 }

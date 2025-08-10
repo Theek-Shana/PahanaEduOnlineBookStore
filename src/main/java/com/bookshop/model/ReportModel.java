@@ -105,7 +105,7 @@ public class ReportModel {
         public int getOrdersHandled() { return ordersHandled; }
         public void setOrdersHandled(int ordersHandled) { this.ordersHandled = ordersHandled; }
     }
-
+ 
     // New inner class for User Order Counts
     public static class UserOrderCount {
         private int userId;

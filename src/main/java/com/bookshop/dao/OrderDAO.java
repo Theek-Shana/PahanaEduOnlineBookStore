@@ -337,7 +337,7 @@ public class OrderDAO {
                     order.setCustomerEmail(rs.getString("customerEmail"));  // set email here
                     order.setStaffName(rs.getString("staffName"));
 
-                    // Fetch order items with book titles
+                     // Fetch order items with book titles
                     List<OrderItem> items = new ArrayList<>();
                     String itemSql = "SELECT oi.item_id, oi.quantity, oi.price, i.title FROM order_items oi JOIN item i ON oi.item_id = i.item_id WHERE oi.order_id = ?";
                     try (PreparedStatement itemStmt = conn.prepareStatement(itemSql)) {

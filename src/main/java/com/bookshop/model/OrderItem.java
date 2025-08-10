@@ -22,7 +22,7 @@ public class OrderItem {
     public void setOrderId(int orderId) {
         this.orderId = orderId;
     }
-
+ 
     public int getItemId() {
         return itemId;
     }

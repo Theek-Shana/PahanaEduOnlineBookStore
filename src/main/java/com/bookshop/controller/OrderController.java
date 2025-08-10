@@ -49,7 +49,7 @@ public class OrderController extends HttpServlet {
 	            order.setPlacedByStaff(false);
 	            order.setStaffId(null);
 	        }
-
+  
 
 	        List<OrderItem> orderItems = new ArrayList<>();
 	        double totalAmount = 0.0;
