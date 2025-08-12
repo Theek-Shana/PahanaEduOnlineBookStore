@@ -531,7 +531,7 @@
 
     <!-- Welcome Section -->
     <div class="section welcome-section" id="welcome-section">
-        <h2><i class="fas fa-home"></i>Welcome to Your Admin Dashboard</h2>
+        <h2><i class="fas fa-home"></i>Welcome to  Admin Dashboard</h2>
         <p>Manage your business operations with ease using our comprehensive admin panel. Access all your tools and data from one centralized location.</p>
         
         <div class="feature-grid">
