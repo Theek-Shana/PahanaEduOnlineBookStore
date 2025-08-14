@@ -128,7 +128,6 @@ public class ItemController extends HttpServlet {
         }
     }
 
-
     private String getAddedByFromSession(HttpSession session) {
         if (session == null) return "unknown";
 

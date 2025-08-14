@@ -120,23 +120,29 @@ button:hover {
 </c:if>
 
 <form action="${pageContext.request.contextPath}/item?action=add" method="post" enctype="multipart/form-data">
-    
-    <!-- Category Selection -->
-    <div class="form-group">
-        <label for="category">📋 Category *</label>
-        <select name="category" id="category" required onchange="updateFormFields()">
-            <option value="">Select Category</option>
-            <option value="Books">📚 Books</option>
-            <option value="Story Books">📖 Story Books</option>
-            <option value="Educational Books">🎓 Educational Books</option>
-            <option value="Comics">💥 Comics</option>
-            <option value="Magazines">📰 Magazines</option>
-            <option value="Accessories">🎯 Accessories</option>
-            <option value="Stationery">✏️ Stationery</option>
-            <option value="Electronics">💻 Electronics</option>
-        </select>
-        <div class="category-hint">Choose the appropriate category for your item</div>
-    </div>
+   <!-- Category Selection -->
+<div class="form-group">
+    <label for="category">📋 Category *</label>
+    <select name="category" id="category" required onchange="updateFormFields()">
+        <option value="">Select Category</option>
+        <option value="Books">📚 Books</option>
+        <option value="Story Books">📖 Story Books</option>
+        <option value="Educational Books">🎓 Educational Books</option>
+        <option value="Comics">💥 Comics</option>
+        <option value="Magazines">📰 Magazines</option>
+        <option value="Accessories">🎯 Accessories</option>
+        <option value="Stationery">✏️ Stationery</option>
+        <option value="Electronics">💻 Electronics</option>
+        <option value="add_new">➕ Add New Category</option>
+    </select>
+    <div class="category-hint">Choose the appropriate category for your item</div>
+</div>
+
+<!-- New Category Input (hidden initially) -->
+<div class="form-group field-group hidden" id="newCategoryField">
+    <label for="newCategory">🆕 Enter New Category *</label>
+    <input type="text" name="newCategory" id="newCategory" placeholder="Enter new category" />
+</div>
 
     <!-- Item Name -->
     <div class="form-group">
@@ -183,11 +189,23 @@ function updateFormFields() {
     const authorField = document.getElementById('authorField');
     const authorInput = document.getElementById('author');
     const authorLabel = document.getElementById('authorLabel');
-    
-    // Reset field visibility
+
+    const newCategoryField = document.getElementById('newCategoryField');
+    const newCategoryInput = document.getElementById('newCategory');
+
+    // Show/hide new category input
+    if(category === 'add_new') {
+        newCategoryField.classList.remove('hidden');
+        newCategoryInput.setAttribute('required', 'required');
+    } else {
+        newCategoryField.classList.add('hidden');
+        newCategoryInput.removeAttribute('required');
+    }
+
+    // Reset author field
     authorField.classList.remove('hidden');
-    
-    // Update field based on category
+
+    // Update author/brand based on selected category
     switch(category) {
         case 'Books':
         case 'Story Books':
@@ -196,43 +214,41 @@ function updateFormFields() {
             authorLabel.innerHTML = '✍️ Author *';
             authorInput.placeholder = 'Enter author name';
             authorInput.setAttribute('required', 'required');
-            authorField.classList.remove('hidden');
             break;
-            
         case 'Magazines':
             authorLabel.innerHTML = '✍️ Author/Editor';
             authorInput.placeholder = 'Enter author or editor name (optional)';
             authorInput.removeAttribute('required');
-            authorField.classList.remove('hidden');
             break;
-            
         case 'Accessories':
         case 'Electronics':
             authorLabel.innerHTML = '🏷️ Brand/Manufacturer';
             authorInput.placeholder = 'Enter brand or manufacturer name (optional)';
             authorInput.removeAttribute('required');
-            authorField.classList.remove('hidden');
             break;
-            
         case 'Stationery':
             authorLabel.innerHTML = '🏷️ Brand';
             authorInput.placeholder = 'Enter brand name (optional)';
             authorInput.removeAttribute('required');
-            authorField.classList.remove('hidden');
             break;
-            
         default:
-            // Hide author field if no category selected
             authorField.classList.add('hidden');
             authorInput.removeAttribute('required');
             break;
     }
 }
 
-// Initialize form on page load
-document.addEventListener('DOMContentLoaded', function() {
-    updateFormFields();
+// On form submit, replace category if new one entered
+document.querySelector('form').addEventListener('submit', function(e) {
+    const categorySelect = document.getElementById('category');
+    const newCategoryInput = document.getElementById('newCategory');
+    if(categorySelect.value === 'add_new' && newCategoryInput.value.trim() !== '') {
+        categorySelect.value = newCategoryInput.value.trim();
+    }
 });
+
+document.addEventListener('DOMContentLoaded', updateFormFields);
+
 </script>
 
 </body>
