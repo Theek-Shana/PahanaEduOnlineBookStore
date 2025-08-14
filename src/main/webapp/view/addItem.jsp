@@ -1,4 +1,5 @@
 <%@ page session="true" contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -51,6 +52,7 @@ input, textarea, select {
     color: #fff;
     outline: none;
     transition: background-color 0.3s ease;
+    box-sizing: border-box;
 }
 
 input:focus, textarea:focus, select:focus {
@@ -93,6 +95,15 @@ button:hover {
     border-radius: 8px;
 }
 
+.success {
+    color: #4caf50;
+    margin-bottom: 20px;
+    text-align: center;
+    padding: 10px;
+    background-color: rgba(76, 175, 80, 0.1);
+    border-radius: 8px;
+}
+
 .field-group {
     transition: all 0.3s ease;
 }
@@ -110,6 +121,24 @@ button:hover {
 .author-label {
     transition: all 0.3s ease;
 }
+
+.back-link {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    color: #fff;
+    text-decoration: none;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.back-link:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    text-decoration: none;
+}
 </style>
 </head>
 <body>
@@ -117,6 +146,10 @@ button:hover {
 
 <c:if test="${not empty error}">
 <div class="error">${error}</div>
+</c:if>
+
+<c:if test="${not empty success}">
+<div class="success">${success}</div>
 </c:if>
 
 <form action="${pageContext.request.contextPath}/item?action=add" method="post" enctype="multipart/form-data">
@@ -141,7 +174,8 @@ button:hover {
 <!-- New Category Input (hidden initially) -->
 <div class="form-group field-group hidden" id="newCategoryField">
     <label for="newCategory">🆕 Enter New Category *</label>
-    <input type="text" name="newCategory" id="newCategory" placeholder="Enter new category" />
+    <input type="text" name="newCategory" id="newCategory" placeholder="Enter new category name" />
+    <div class="category-hint">This will create a new category in your system</div>
 </div>
 
     <!-- Item Name -->
@@ -183,6 +217,8 @@ button:hover {
     <button type="submit">➕ Add Item</button>
 </form>
 
+<a href="${pageContext.request.contextPath}/item?action=list" class="back-link">← Back to Items List</a>
+
 <script>
 function updateFormFields() {
     const category = document.getElementById('category').value;
@@ -200,6 +236,7 @@ function updateFormFields() {
     } else {
         newCategoryField.classList.add('hidden');
         newCategoryInput.removeAttribute('required');
+        newCategoryInput.value = ''; // Clear the value when hidden
     }
 
     // Reset author field
@@ -231,23 +268,102 @@ function updateFormFields() {
             authorInput.placeholder = 'Enter brand name (optional)';
             authorInput.removeAttribute('required');
             break;
-        default:
-            authorField.classList.add('hidden');
+        case 'add_new':
+            authorLabel.innerHTML = '✍️ Author/Brand';
+            authorInput.placeholder = 'Enter author or brand name (optional)';
             authorInput.removeAttribute('required');
+            break;
+        default:
+            if (category === '') {
+                authorField.classList.add('hidden');
+                authorInput.removeAttribute('required');
+            } else {
+                authorLabel.innerHTML = '✍️ Author/Brand';
+                authorInput.placeholder = 'Enter author or brand name (optional)';
+                authorInput.removeAttribute('required');
+            }
             break;
     }
 }
 
-// On form submit, replace category if new one entered
+// Form validation before submit
 document.querySelector('form').addEventListener('submit', function(e) {
     const categorySelect = document.getElementById('category');
     const newCategoryInput = document.getElementById('newCategory');
-    if(categorySelect.value === 'add_new' && newCategoryInput.value.trim() !== '') {
-        categorySelect.value = newCategoryInput.value.trim();
+    
+    // If "Add New Category" is selected, validate that new category name is provided
+    if(categorySelect.value === 'add_new') {
+        if(!newCategoryInput.value || newCategoryInput.value.trim() === '') {
+            e.preventDefault();
+            alert('Please enter a new category name!');
+            newCategoryInput.focus();
+            return false;
+        }
+        
+        // Validate category name doesn't contain special characters
+        const categoryName = newCategoryInput.value.trim();
+        if (categoryName.length < 2) {
+            e.preventDefault();
+            alert('Category name must be at least 2 characters long!');
+            newCategoryInput.focus();
+            return false;
+        }
+        
+        // Check for valid category name (letters, numbers, spaces only)
+        if (!/^[a-zA-Z0-9\s]+$/.test(categoryName)) {
+            e.preventDefault();
+            alert('Category name can only contain letters, numbers, and spaces!');
+            newCategoryInput.focus();
+            return false;
+        }
     }
+    
+    // Basic form validation
+    const requiredFields = ['title', 'price', 'stock_quantity', 'description'];
+    for (let field of requiredFields) {
+        const element = document.getElementById(field);
+        if (!element.value || element.value.trim() === '') {
+            e.preventDefault();
+            alert('Please fill in all required fields!');
+            element.focus();
+            return false;
+        }
+    }
+    
+    // Validate image file
+    const imageInput = document.getElementById('image');
+    if (!imageInput.files || imageInput.files.length === 0) {
+        e.preventDefault();
+        alert('Please select an image file!');
+        imageInput.focus();
+        return false;
+    }
+    
+    // Check file type
+    const file = imageInput.files[0];
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+        e.preventDefault();
+        alert('Please select a valid image file (JPEG, PNG, or GIF)!');
+        imageInput.focus();
+        return false;
+    }
+    
+    // Check file size (10MB max)
+    if (file.size > 10 * 1024 * 1024) {
+        e.preventDefault();
+        alert('Image file size must be less than 10MB!');
+        imageInput.focus();
+        return false;
+    }
+    
+    return true;
 });
 
-document.addEventListener('DOMContentLoaded', updateFormFields);
+// Initialize form on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateFormFields();
+});
 
 </script>
 

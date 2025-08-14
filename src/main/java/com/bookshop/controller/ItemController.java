@@ -89,26 +89,70 @@ public class ItemController extends HttpServlet {
         String addedBy = getAddedByFromSession(session);
 
         try {
-            String title = request.getParameter("title").trim();
-            String author = request.getParameter("author").trim();
-            double price = Double.parseDouble(request.getParameter("price"));
-            int stock = Integer.parseInt(request.getParameter("stock_quantity"));
-            String description = request.getParameter("description").trim();
-            String category = request.getParameter("category").trim();
+            // Get parameters safely with null checks
+            String title = getParameterSafely(request, "title");
+            String author = getParameterSafely(request, "author");
+            String priceStr = getParameterSafely(request, "price");
+            String stockStr = getParameterSafely(request, "stock_quantity");
+            String description = getParameterSafely(request, "description");
+            String category = getParameterSafely(request, "category");
+
+            // Handle new category case
+            if ("add_new".equals(category)) {
+                String newCategory = getParameterSafely(request, "newCategory");
+                if (newCategory.isEmpty()) {
+                    request.setAttribute("error", "Please enter a new category name!");
+                    request.getRequestDispatcher("/view/addItem.jsp").forward(request, response);
+                    return;
+                }
+                category = newCategory;
+            }
+
+            // Validate required fields
+            if (title.isEmpty() || priceStr.isEmpty() || stockStr.isEmpty() || 
+                description.isEmpty() || category.isEmpty()) {
+                request.setAttribute("error", "All required fields must be filled!");
+                request.getRequestDispatcher("/view/addItem.jsp").forward(request, response);
+                return;
+            }
+
+            double price;
+            int stock;
+            
+            try {
+                price = Double.parseDouble(priceStr);
+                stock = Integer.parseInt(stockStr);
+            } catch (NumberFormatException e) {
+                request.setAttribute("error", "Please enter valid numbers for price and stock quantity!");
+                request.getRequestDispatcher("/view/addItem.jsp").forward(request, response);
+                return;
+            }
+
+            if (price < 0 || stock < 0) {
+                request.setAttribute("error", "Price and stock quantity cannot be negative!");
+                request.getRequestDispatcher("/view/addItem.jsp").forward(request, response);
+                return;
+            }
 
             // Check if item already exists
             if (itemService.isItemExist(title, category)) {
                 request.setAttribute("error", "Item with this name and category already exists!");
                 request.getRequestDispatcher("/view/addItem.jsp").forward(request, response);
-                return; // stop further processing
+                return;
             }
 
             Part imagePart = request.getPart("image");
+            if (imagePart == null || imagePart.getSize() == 0) {
+                request.setAttribute("error", "Please select an image file!");
+                request.getRequestDispatcher("/view/addItem.jsp").forward(request, response);
+                return;
+            }
+
             String imagePath = handleFileUpload(imagePart, request);
 
             Item item = new Item();
             item.setTitle(title);
-            item.setAuthor(author);
+            item.setAuthor(author.isEmpty() ? null : author); // Allow empty author for some categories
             item.setPrice(price);
             item.setStockQuantity(stock);
             item.setDescription(description);
@@ -116,9 +160,14 @@ public class ItemController extends HttpServlet {
             item.setImage(imagePath);
             item.setAddedBy(addedBy);
 
-            itemService.addItem(item);
-
-            request.setAttribute("success", "Item successfully added!");
+            boolean success = itemService.addItem(item);
+            
+            if (success) {
+                request.setAttribute("success", "Item successfully added!");
+            } else {
+                request.setAttribute("error", "Failed to add item. Please try again.");
+            }
+            
             request.getRequestDispatcher("/view/addItem.jsp").forward(request, response);
 
         } catch (Exception e) {
@@ -128,23 +177,99 @@ public class ItemController extends HttpServlet {
         }
     }
 
+    /**
+     * Safely get parameter with null and empty string checks
+     */
+    private String getParameterSafely(HttpServletRequest request, String paramName) {
+        String value = request.getParameter(paramName);
+        if (value == null) {
+            return "";
+        }
+        return value.trim();
+    }
+
     private String getAddedByFromSession(HttpSession session) {
-        if (session == null) return "unknown";
-
-        String userType = (String) session.getAttribute("userType");
-        Object user = session.getAttribute("user");
-
-        // Since you unified users into one User class, you can cast accordingly.
-        // Adjust if you keep separate models.
-        if ("staff".equals(userType) && user instanceof com.bookshop.model.User) {
-            return ((com.bookshop.model.User) user).getEmail();
-        } else if ("admin".equals(userType) && user instanceof com.bookshop.model.User) {
-            return ((com.bookshop.model.User) user).getEmail();
-        } else if ("customer".equals(userType) && user instanceof com.bookshop.model.User) {
-            return ((com.bookshop.model.User) user).getEmail();
-        } else {
+        if (session == null) {
+            System.out.println("Session is null");
             return "unknown";
         }
+
+        // Try different possible session attribute names
+        String userEmail = null;
+        
+        // Method 1: Try getting email directly from session
+        userEmail = (String) session.getAttribute("userEmail");
+        if (userEmail != null && !userEmail.trim().isEmpty()) {
+            return userEmail;
+        }
+        
+        // Method 2: Try getting from user object
+        Object user = session.getAttribute("user");
+        if (user != null) {
+            try {
+                // Try casting to User class and get email
+                if (user instanceof com.bookshop.model.User) {
+                    userEmail = ((com.bookshop.model.User) user).getEmail();
+                    if (userEmail != null && !userEmail.trim().isEmpty()) {
+                        return userEmail;
+                    }
+                }
+                
+                // Try reflection to get email if the class structure is different
+                java.lang.reflect.Method getEmailMethod = user.getClass().getMethod("getEmail");
+                userEmail = (String) getEmailMethod.invoke(user);
+                if (userEmail != null && !userEmail.trim().isEmpty()) {
+                    return userEmail;
+                }
+            } catch (Exception e) {
+                System.out.println("Error getting email from user object: " + e.getMessage());
+            }
+        }
+        
+        // Method 3: Try other common session attribute names
+        String[] possibleEmailKeys = {"email", "loginEmail", "currentUser", "loggedInUser"};
+        for (String key : possibleEmailKeys) {
+            Object value = session.getAttribute(key);
+            if (value != null) {
+                if (value instanceof String) {
+                    userEmail = (String) value;
+                    if (userEmail != null && !userEmail.trim().isEmpty()) {
+                        return userEmail;
+                    }
+                }
+            }
+        }
+        
+        // Method 4: Try getting userType and user combination
+        String userType = (String) session.getAttribute("userType");
+        System.out.println("User type: " + userType + ", User object: " + (user != null ? user.getClass().getName() : "null"));
+        
+        if (userType != null && user != null) {
+            try {
+                if ("staff".equals(userType) || "admin".equals(userType) || "customer".equals(userType)) {
+                    if (user instanceof com.bookshop.model.User) {
+                        userEmail = ((com.bookshop.model.User) user).getEmail();
+                        if (userEmail != null && !userEmail.trim().isEmpty()) {
+                            return userEmail;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println("Error in userType-based retrieval: " + e.getMessage());
+            }
+        }
+        
+        // Log session attributes for debugging
+        System.out.println("Session attributes:");
+        java.util.Enumeration<String> attributeNames = session.getAttributeNames();
+        while (attributeNames.hasMoreElements()) {
+            String attributeName = attributeNames.nextElement();
+            Object attributeValue = session.getAttribute(attributeName);
+            System.out.println("  " + attributeName + " = " + attributeValue + " (" + 
+                             (attributeValue != null ? attributeValue.getClass().getName() : "null") + ")");
+        }
+        
+        return "unknown";
     }
 
     private String handleFileUpload(Part filePart, HttpServletRequest request) throws IOException {
@@ -153,6 +278,17 @@ public class ItemController extends HttpServlet {
         }
 
         String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+        
+        // Add timestamp to prevent filename collisions
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        String fileExtension = "";
+        int dotIndex = fileName.lastIndexOf('.');
+        if (dotIndex > 0) {
+            fileExtension = fileName.substring(dotIndex);
+            fileName = fileName.substring(0, dotIndex) + "_" + timestamp + fileExtension;
+        } else {
+            fileName = fileName + "_" + timestamp;
+        }
 
         // Sanitize filename or add timestamp if needed to avoid collisions
         String uploadPath = request.getServletContext().getRealPath("") + File.separator + "uploads";
@@ -198,12 +334,23 @@ public class ItemController extends HttpServlet {
 
         try {
             int itemId = Integer.parseInt(request.getParameter("itemId"));
-            String title = request.getParameter("title");
-            String author = request.getParameter("author");
-            double price = Double.parseDouble(request.getParameter("price"));
-            int stock = Integer.parseInt(request.getParameter("stock_quantity"));
-            String description = request.getParameter("description");
-            String category = request.getParameter("category");
+            String title = getParameterSafely(request, "title");
+            String author = getParameterSafely(request, "author");
+            String priceStr = getParameterSafely(request, "price");
+            String stockStr = getParameterSafely(request, "stock_quantity");
+            String description = getParameterSafely(request, "description");
+            String category = getParameterSafely(request, "category");
+
+            // Handle new category case for update as well
+            if ("add_new".equals(category)) {
+                String newCategory = getParameterSafely(request, "newCategory");
+                if (!newCategory.isEmpty()) {
+                    category = newCategory;
+                }
+            }
+
+            double price = Double.parseDouble(priceStr);
+            int stock = Integer.parseInt(stockStr);
 
             Part filePart = request.getPart("image");
             String imagePath;
@@ -217,7 +364,7 @@ public class ItemController extends HttpServlet {
             Item item = new Item();
             item.setItemId(itemId);
             item.setTitle(title);
-            item.setAuthor(author);
+            item.setAuthor(author.isEmpty() ? null : author);
             item.setPrice(price);
             item.setStockQuantity(stock);
             item.setDescription(description);

@@ -48,7 +48,7 @@ public class ItemService {
         return itemDAO.deleteItem(itemId);
     }
     
-    
+     
     
     public List<String> getAllCategories() {
         try (Connection conn = DBConnection.getInstance().getConnection()) {
