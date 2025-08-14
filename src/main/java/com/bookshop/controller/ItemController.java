@@ -89,12 +89,19 @@ public class ItemController extends HttpServlet {
         String addedBy = getAddedByFromSession(session);
 
         try {
-            String title = request.getParameter("title");
-            String author = request.getParameter("author");
+            String title = request.getParameter("title").trim();
+            String author = request.getParameter("author").trim();
             double price = Double.parseDouble(request.getParameter("price"));
             int stock = Integer.parseInt(request.getParameter("stock_quantity"));
-            String description = request.getParameter("description");
-            String category = request.getParameter("category");
+            String description = request.getParameter("description").trim();
+            String category = request.getParameter("category").trim();
+
+            // Check if item already exists
+            if (itemService.isItemExist(title, category)) {
+                request.setAttribute("error", "Item with this name and category already exists!");
+                request.getRequestDispatcher("/view/addItem.jsp").forward(request, response);
+                return; // stop further processing
+            }
 
             Part imagePart = request.getPart("image");
             String imagePath = handleFileUpload(imagePart, request);
@@ -110,13 +117,17 @@ public class ItemController extends HttpServlet {
             item.setAddedBy(addedBy);
 
             itemService.addItem(item);
-            response.sendRedirect(request.getContextPath() + "/item?action=list");
+
+            request.setAttribute("success", "Item successfully added!");
+            request.getRequestDispatcher("/view/addItem.jsp").forward(request, response);
+
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("error", "Failed to add item: " + e.getMessage());
             request.getRequestDispatcher("/view/addItem.jsp").forward(request, response);
         }
     }
+
 
     private String getAddedByFromSession(HttpSession session) {
         if (session == null) return "unknown";

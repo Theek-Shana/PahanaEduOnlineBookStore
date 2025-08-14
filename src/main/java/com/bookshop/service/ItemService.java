@@ -59,5 +59,8 @@ public class ItemService {
             return new ArrayList<>();
         }
     }
+    public boolean isItemExist(String title, String category) {
+        return itemDAO.isItemExist(title, category);
+    }
 
 }

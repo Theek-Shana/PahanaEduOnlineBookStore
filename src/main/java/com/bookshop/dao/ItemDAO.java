@@ -157,4 +157,21 @@ public class ItemDAO {
         return categories;
     }
 
+    
+    // Check if item exists
+    public boolean isItemExist(String title, String category) {
+        String sql = "SELECT COUNT(*) FROM item WHERE title = ? AND category = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, title);
+            ps.setString(2, category);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
 }
