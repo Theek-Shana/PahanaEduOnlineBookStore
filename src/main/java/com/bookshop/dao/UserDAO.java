@@ -4,6 +4,7 @@ import com.bookshop.model.User;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class UserDAO {
 
@@ -16,45 +17,46 @@ public class UserDAO {
     }
 
     public User login(String email, String password) throws SQLException {
-        String sql = "SELECT * FROM users WHERE email = ? AND password = ?";
-        try (Connection con = getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        String sql = "SELECT * FROM users WHERE email = ?";
+        try (Connection con = getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, email);
-            ps.setString(2, password);
-
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    User user = new User();
-                    user.setId(rs.getInt("id"));
-                    user.setAccountNumber(rs.getString("account_number"));
-                    user.setFullname(rs.getString("fullname"));
-                    user.setEmail(rs.getString("email"));
-                    user.setMobile(rs.getString("mobile"));
-                    user.setUsername(rs.getString("username"));
-                    user.setPassword(rs.getString("password"));
-                    user.setAddress(rs.getString("address"));
-                    user.setTelephone(rs.getString("telephone"));
-                    user.setProfilePhoto(rs.getString("profile_photo"));
-                    user.setCreatedAt(rs.getTimestamp("created_at"));
-                    user.setRole(rs.getString("role"));
-                    return user;
+                    String storedHash = rs.getString("password");
+                    if (BCrypt.checkpw(password, storedHash)) {
+                        User user = new User();
+                        user.setId(rs.getInt("id"));
+                        user.setAccountNumber(rs.getString("account_number"));
+                        user.setFullname(rs.getString("fullname"));
+                        user.setEmail(rs.getString("email"));
+                        user.setMobile(rs.getString("mobile"));
+                        user.setUsername(rs.getString("username"));
+                        user.setPassword(storedHash);
+                        user.setAddress(rs.getString("address"));
+                        user.setTelephone(rs.getString("telephone"));
+                        user.setProfilePhoto(rs.getString("profile_photo"));
+                        user.setCreatedAt(rs.getTimestamp("created_at"));
+                        user.setRole(rs.getString("role"));
+                        return user;
+                    }
                 }
             }
         }
         return null;
     }
 
+
     public boolean registerUser(User user) throws SQLException {
+        String hashedPassword = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
         String sql = "INSERT INTO users (fullname, email, mobile, password, role, account_number) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection con = getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, user.getFullname());
             ps.setString(2, user.getEmail());
             ps.setString(3, user.getMobile());
-            ps.setString(4, user.getPassword());
+            ps.setString(4, hashedPassword); // store hashed password
             ps.setString(5, user.getRole());
             ps.setString(6, user.getAccountNumber());
-            int result = ps.executeUpdate();
-            return result > 0;
+            return ps.executeUpdate() > 0;
         }
     }
 
@@ -119,12 +121,13 @@ public class UserDAO {
     }
 
     public void updateUserByAdmin(User user) throws SQLException {
+        String hashedPassword = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
         String sql = "UPDATE users SET fullname = ?, email = ?, mobile = ?, password = ? WHERE id = ?";
         try (Connection con = getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, user.getFullname());
             ps.setString(2, user.getEmail());
             ps.setString(3, user.getMobile());
-            ps.setString(4, user.getPassword());
+            ps.setString(4, hashedPassword);
             ps.setInt(5, user.getId());
             ps.executeUpdate();
         }
@@ -201,9 +204,10 @@ public class UserDAO {
 
 
     public void updatePasswordByEmail(String email, String newPassword) throws SQLException {
+        String hashedPassword = BCrypt.hashpw(newPassword, BCrypt.gensalt());
         String sql = "UPDATE users SET password = ? WHERE email = ?";
         try (Connection con = getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, newPassword);
+            ps.setString(1, hashedPassword);
             ps.setString(2, email);
             ps.executeUpdate();
         }
