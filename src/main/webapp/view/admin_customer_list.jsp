@@ -254,7 +254,7 @@
 </head>
 
 <body>
-<h1>Admin Dashboard - Customer Management</h1>
+<h1>Pahana Edu - Customer Management</h1>
 
 <div class="button-group">
   <button class="main-btn" onclick="showSection('add-section')">Add Customer</button>
