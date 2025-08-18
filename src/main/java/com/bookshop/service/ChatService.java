@@ -10,15 +10,15 @@ import java.util.List;
 
 public class ChatService {
 
-    // 🔹 Singleton instance
+   
     private static ChatService instance;
 
-    // 🔹 Private constructor
+  
     private ChatService() {
-        // Nothing needed here for now
+        
     }
 
-    // 🔹 Global access point
+    
     public static synchronized ChatService getInstance() {
         if (instance == null) {
             instance = new ChatService();

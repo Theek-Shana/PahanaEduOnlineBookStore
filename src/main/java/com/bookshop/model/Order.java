@@ -11,13 +11,12 @@ public class Order {
     private boolean placedByStaff;
     private List<OrderItem> items;
 
-    private String status = "Pending";  // default value
-
+    private String status = "Pending";  
     private String staffMessage;
 
-    private String customerName;  // Add this field
+    private String customerName;  
 
-    // getters/setters for all fields
+    
 
     public int getOrderId() {
         return orderId;

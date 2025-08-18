@@ -4,13 +4,13 @@ import java.sql.Timestamp;
 
 public class ChatMessage {
     private int id;
-    private int orderId;           // 0 if private chat
-    private String senderType;     // "staff" or "customer"
+    private int orderId;          
+    private String senderType;     
     private int senderId;
     private String message;
     private Timestamp sentAt;
-    private String chatType;       // "order" or "private"
-    private Integer receiverId;    // Nullable for private chats
+    private String chatType;       
+    private Integer receiverId;    
 
     // Getters and setters
     public int getId() { return id; }
