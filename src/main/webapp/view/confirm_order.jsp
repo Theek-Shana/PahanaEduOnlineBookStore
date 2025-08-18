@@ -10,16 +10,16 @@
     }
 
     double total = 0;
-    Connection conn = DBConnection.getInstance().getConnection();
-    ItemDAO itemDAO = new ItemDAO(conn);
+    ItemDAO itemDAO = new ItemDAO(); 
     List<Item> cartItems = new ArrayList<>();
     for (Map.Entry<Integer, Integer> entry : cart.entrySet()) {
         Item item = itemDAO.getItemById(entry.getKey());
         if (item != null) {
-            item.setStockQuantity(entry.getValue()); // Use stockQuantity as "cart quantity"
+            item.setStockQuantity(entry.getValue());
             cartItems.add(item);
         }
     }
+
 %>
 
 

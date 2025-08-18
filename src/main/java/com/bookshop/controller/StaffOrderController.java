@@ -23,13 +23,14 @@ public class StaffOrderController extends HttpServlet {
     public void init() throws ServletException {
         try {
             Connection conn = DBConnection.getInstance().getConnection();
-            userDAO = new UserDAO();
-            orderDAO = new OrderDAO(conn);
-            itemDAO = new ItemDAO(conn);
+            userDAO = new UserDAO();       
+            orderDAO = new OrderDAO();
+            itemDAO = new ItemDAO();        
         } catch (SQLException e) {
             throw new ServletException("Failed to initialize DAOs", e);
         }
     }
+
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

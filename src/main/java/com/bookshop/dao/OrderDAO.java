@@ -1,9 +1,6 @@
 package com.bookshop.dao;
 
-import com.bookshop.model.Order;
-import com.bookshop.model.OrderItem;
-import com.bookshop.model.ReportModel;
-
+import com.bookshop.model.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +9,12 @@ public class OrderDAO {
 
     private final Connection conn;
 
+    // No-arg constructor: uses singleton DBConnection
+    public OrderDAO() throws SQLException {
+        this.conn = DBConnection.getInstance().getConnection();
+    }
+
+    // Optional constructor for testing or flexibility
     public OrderDAO(Connection conn) {
         this.conn = conn;
     }
@@ -42,7 +45,6 @@ public class OrderDAO {
                 }
 
                 psOrder.setString(5, order.getStatus());
-
                 int affectedRows = psOrder.executeUpdate();
                 if (affectedRows == 0) {
                     throw new SQLException("Creating order failed, no rows affected.");
@@ -81,6 +83,7 @@ public class OrderDAO {
 
         return orderId;
     }
+
 
     /**
      * Get all orders with customer and staff names and order items.
@@ -313,15 +316,22 @@ public class OrderDAO {
     }
     public Order getOrderById(int orderId) throws SQLException {
         Order order = null;
-        String sql = "SELECT o.order_id, o.user_id, o.total_amount, o.order_date, o.placed_by_staff, o.order_status, o.staff_message, " +
-                     "u.fullname AS customerName, u.email AS customerEmail, s.fullname AS staffName " +
-                     "FROM orders o " +
-                     "JOIN users u ON o.user_id = u.id " +
-                     "LEFT JOIN users s ON o.staff_id = s.id " +
-                     "WHERE o.order_id = ?";
+
+        // Main order query with customer and staff info
+        String sql = """
+            SELECT o.order_id, o.user_id, o.total_amount, o.order_date, o.placed_by_staff, 
+                   o.order_status, o.staff_message,
+                   u.fullname AS customerName, u.email AS customerEmail,
+                   s.fullname AS staffName
+            FROM orders o
+            JOIN users u ON o.user_id = u.id
+            LEFT JOIN users s ON o.staff_id = s.id
+            WHERE o.order_id = ?
+            """;
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, orderId);
+
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     order = new Order();
@@ -334,12 +344,18 @@ public class OrderDAO {
                     order.setStatus(rs.getString("order_status"));
                     order.setStaffMessage(rs.getString("staff_message"));
                     order.setCustomerName(rs.getString("customerName"));
-                    order.setCustomerEmail(rs.getString("customerEmail"));  // set email here
+                    order.setCustomerEmail(rs.getString("customerEmail"));
                     order.setStaffName(rs.getString("staffName"));
 
-                     // Fetch order items with book titles
+                    // Fetch order items with book titles
+                    String itemSql = """
+                        SELECT oi.item_id, oi.quantity, oi.price, i.title 
+                        FROM order_items oi
+                        JOIN item i ON oi.item_id = i.item_id
+                        WHERE oi.order_id = ?
+                        """;
+
                     List<OrderItem> items = new ArrayList<>();
-                    String itemSql = "SELECT oi.item_id, oi.quantity, oi.price, i.title FROM order_items oi JOIN item i ON oi.item_id = i.item_id WHERE oi.order_id = ?";
                     try (PreparedStatement itemStmt = conn.prepareStatement(itemSql)) {
                         itemStmt.setInt(1, orderId);
                         try (ResultSet itemRs = itemStmt.executeQuery()) {
@@ -348,7 +364,7 @@ public class OrderDAO {
                                 item.setItemId(itemRs.getInt("item_id"));
                                 item.setQuantity(itemRs.getInt("quantity"));
                                 item.setPrice(itemRs.getDouble("price"));
-                                item.setBookTitle(itemRs.getString("title"));
+                                item.setBookTitle(itemRs.getString("title")); // consistent naming
                                 items.add(item);
                             }
                         }
@@ -357,8 +373,10 @@ public class OrderDAO {
                 }
             }
         }
+
         return order;
     }
+
 
 
     

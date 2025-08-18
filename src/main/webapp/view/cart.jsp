@@ -128,16 +128,14 @@
     <%
         if (cart == null || cart.isEmpty()) {
     %>
-        <p style="text-align:center; font-size:1.2rem;">Your cart is empty.</p>
-    <%
-        } else {
-            Connection conn = null;
-            ItemDAO itemDAO = null;
-            double total = 0;
-            try {
-                conn = DBConnection.getInstance().getConnection();
-                itemDAO = new ItemDAO(conn);
-    %>
+        <p style="text-align:center; font-size:1.2rem;">Your cart is empty.</p><%
+    } else {
+        ItemDAO itemDAO = null;
+        double total = 0;
+        try {
+            itemDAO = new ItemDAO(); // Uses DBConnection singleton internally
+%>
+
     <table>
         <thead>
             <tr>
@@ -199,8 +197,9 @@
                 out.println("<p style='color:red;'>Error loading cart items: " + e.getMessage() + "</p>");
                 e.printStackTrace();
             } finally {
-                if(conn != null) try { conn.close(); } catch(Exception ignored) {}
+                // no manual connection closing needed
             }
+
         }
     %>
 </div>

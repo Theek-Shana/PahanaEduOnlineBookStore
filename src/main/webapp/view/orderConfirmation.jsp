@@ -1,39 +1,4 @@
-<%@ page import="java.sql.*, com.bookshop.dao.DBConnection, com.bookshop.model.Item, com.bookshop.dao.ItemDAO" %>
-<%
-    String orderIdStr = request.getParameter("orderId");
-    if (orderIdStr == null) {
-        response.sendRedirect("/view/customerDashboard.jsp");
-        return;
-    }
-
-    int orderId = Integer.parseInt(orderIdStr);
-    Connection conn = null;
-
-    try {
-        conn = DBConnection.getInstance().getConnection();
-
-        // Get order details
-        PreparedStatement orderStmt = conn.prepareStatement("SELECT * FROM orders WHERE order_id = ?");
-        orderStmt.setInt(1, orderId);
-        ResultSet orderRs = orderStmt.executeQuery();
-
-        if (!orderRs.next()) {
-            out.println("<p>Order not found.</p>");
-            return;
-        }
-
-        int userId = orderRs.getInt("user_id");
-        Timestamp orderDate = orderRs.getTimestamp("order_date");
-        double totalAmount = orderRs.getDouble("total_amount");
-        String status = orderRs.getString("status");
-
-        // Get ordered items
-        PreparedStatement itemsStmt = conn.prepareStatement(
-            "SELECT oi.item_id, oi.quantity, oi.price, i.title FROM order_items oi JOIN item i ON oi.item_id = i.item_id WHERE oi.order_id = ?");
-        itemsStmt.setInt(1, orderId);
-        ResultSet itemsRs = itemsStmt.executeQuery();
- 
-%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -51,9 +16,9 @@
 <body>
     <div class="container">
         <h2>Thank you for your order!</h2>
-        <p><strong>Order ID:</strong> <%= orderId %></p>
-        <p><strong>Order Date:</strong> <%= orderDate %></p>
-        <p><strong>Status:</strong> <%= status %></p>
+        <p><strong>Order ID:</strong> ${order.id}</p>
+        <p><strong>Order Date:</strong> ${order.orderDate}</p>
+        <p><strong>Status:</strong> ${order.status}</p>
 
         <table>
             <thead>
@@ -65,42 +30,24 @@
                 </tr>
             </thead>
             <tbody>
-                <%
-                    while (itemsRs.next()) {
-                        String title = itemsRs.getString("title");
-                        int quantity = itemsRs.getInt("quantity");
-                        double price = itemsRs.getDouble("price");
-                        double subtotal = price * quantity;
-                %>
-                <tr>
-                    <td><%= title %></td>
-                    <td><%= quantity %></td>
-                    <td>LKR <%= String.format("%.2f", price) %></td>
-                    <td>LKR <%= String.format("%.2f", subtotal) %></td>
-                </tr>
-                <% } %>
+                <c:forEach var="item" items="${order.items}">
+                    <tr>
+                        <td>${item.title}</td>
+                        <td>${item.quantity}</td>
+                        <td>LKR ${item.price}</td>
+                        <td>LKR ${item.price * item.quantity}</td>
+                    </tr>
+                </c:forEach>
             </tbody>
             <tfoot>
                 <tr>
                     <th colspan="3" style="text-align:right;">Total:</th>
-                    <th>LKR <%= String.format("%.2f", totalAmount) %></th>
+                    <th>LKR ${order.totalAmount}</th>
                 </tr>
             </tfoot>
         </table>
 
-        <p><a href="<%= request.getContextPath() %>/view/customerDashboard.jsp">Back to Dashboard</a></p>
+        <p><a href="${pageContext.request.contextPath}/view/customerDashboard.jsp">Back to Dashboard</a></p>
     </div>
 </body>
 </html>
-<%
-        itemsRs.close();
-        itemsStmt.close();
-        orderRs.close();
-        orderStmt.close();
-    } catch (Exception e) {
-        e.printStackTrace();
-        out.println("<p>Error loading order details.</p>");
-    } finally {
-        if (conn != null) try { conn.close(); } catch (Exception ignored) {}
-    }
-%>

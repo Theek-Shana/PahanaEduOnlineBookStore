@@ -11,14 +11,15 @@ public class OrderService {
 
     private OrderDAO orderDAO;
 
-    public OrderService(Connection conn) {
-        this.orderDAO = new OrderDAO(conn);
+    public OrderService() throws SQLException {
+        this.orderDAO = new OrderDAO(); 
     }
 
     public boolean placeOrder(Order order) throws SQLException {
         int orderId = orderDAO.placeOrder(order);
         return orderId > 0;
     }
+
     public List<Order> getAllOrders() throws SQLException {
         return orderDAO.getAllOrders();
     }
@@ -27,3 +28,4 @@ public class OrderService {
         return orderDAO.updateOrderStatus(orderId, status, message, staffId);
     } 
 }
+

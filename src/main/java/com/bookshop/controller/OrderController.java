@@ -97,7 +97,7 @@ public class OrderController extends HttpServlet {
 	}
 
     
-    @Override
+	@Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(false);
         if (session == null || session.getAttribute("user") == null) {
@@ -105,30 +105,34 @@ public class OrderController extends HttpServlet {
             return;
         }
 
-        User user = (User) session.getAttribute("user");
-        int userId = user.getId();
+        String orderIdStr = req.getParameter("orderId");
+        if (orderIdStr == null) {
+            resp.sendRedirect(req.getContextPath() + "/view/customerDashboard.jsp");
+            return;
+        }
 
-        String orderIdParam = req.getParameter("orderId");
-        if (orderIdParam == null) {
-            resp.sendRedirect(req.getContextPath() + "/view/orders.jsp");
+        int orderId;
+        try {
+            orderId = Integer.parseInt(orderIdStr);
+        } catch (NumberFormatException e) {
+            resp.sendRedirect(req.getContextPath() + "/view/customerDashboard.jsp");
             return;
         }
 
         try (Connection conn = DBConnection.getInstance().getConnection()) {
             OrderDAO orderDAO = new OrderDAO(conn);
-            int orderId = Integer.parseInt(orderIdParam);
-
-            boolean deleted = orderDAO.deleteOrderById(orderId, userId);
-            if (!deleted) {
-                // Optional: set message "Order not found or not owned by you"
+            Order order = orderDAO.getOrderById(orderId); 
+            if (order == null) {
+                resp.sendRedirect(req.getContextPath() + "/view/customerDashboard.jsp");
+                return;
             }
+
+            req.setAttribute("order", order);
+            req.getRequestDispatcher("/view/orderConfirmation.jsp").forward(req, resp);
+
         } catch (Exception e) {
             e.printStackTrace();
-            // Optional: set error message
+            resp.sendRedirect(req.getContextPath() + "/view/customerDashboard.jsp");
         }
-
-        resp.sendRedirect(req.getContextPath() + "/view/orders.jsp");
     }
-
-    
 }
