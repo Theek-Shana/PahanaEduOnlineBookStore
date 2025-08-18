@@ -24,9 +24,9 @@ public class StaffOrderController extends HttpServlet {
         try {
             Connection conn = DBConnection.getInstance().getConnection();
 
-            userDAO = new UserDAO();
-            orderDAO = new OrderDAO(conn); 
-            itemDAO = new ItemDAO();      
+            userDAO = new UserDAO();       // no-arg constructor
+            orderDAO = new OrderDAO(conn); // pass connection if desired
+            itemDAO = new ItemDAO();       // no-arg constructor only
 
         } catch (SQLException e) {
             throw new ServletException("Failed to initialize DAOs", e);
