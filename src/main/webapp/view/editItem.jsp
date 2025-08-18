@@ -12,7 +12,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Edit Book</title>
+    <title>Edit Item</title>
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -113,7 +113,7 @@
         <label for="image">Change Image (optional):</label>
         <input type="file" name="image" accept="image/*" />
 
-        <button type="submit">Update Book</button>
+        <button type="submit">Update item</button>
     </form>
 </div>
 

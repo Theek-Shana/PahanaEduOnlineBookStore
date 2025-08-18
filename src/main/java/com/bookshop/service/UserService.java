@@ -7,15 +7,15 @@ import java.sql.SQLException;
 import java.util.List;
 
 public class UserService {
-    private static UserService instance; // 🔹 Singleton instance
+    private static UserService instance; 
     private UserDAO userDAO;
 
-    // 🔹 Private constructor (no one can call new UserService() from outside)
+    
     private UserService() {
         this.userDAO = new UserDAO();
     }
 
-    // 🔹 Global access point
+    
     public static synchronized UserService getInstance() {
         if (instance == null) {
             instance = new UserService();
@@ -23,7 +23,7 @@ public class UserService {
         return instance;
     }
 
-    // ---------------- Methods ----------------
+   
 
     public User login(String email, String password) throws SQLException {
         return userDAO.login(email, password);

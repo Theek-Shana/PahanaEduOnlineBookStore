@@ -7,10 +7,10 @@ import java.util.List;
 
 public class ItemService {
 
-    private static ItemService instance; // singleton instance
+    private static ItemService instance; 
     private final ItemDAO itemDAO;
 
-    // private constructor
+   
     private ItemService() {
         try {
             this.itemDAO = new ItemDAO();
@@ -19,7 +19,7 @@ public class ItemService {
         }
     }
 
-    // getInstance method
+    
     public static synchronized ItemService getInstance() {
         if (instance == null) {
             instance = new ItemService();

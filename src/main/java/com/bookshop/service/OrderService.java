@@ -11,12 +11,12 @@ public class OrderService {
     private static OrderService instance;
     private final OrderDAO orderDAO;
 
-    // Private constructor for Singleton
+  
     private OrderService() throws SQLException {
         this.orderDAO = new OrderDAO();
     }
 
-    // Singleton getInstance method
+  
     public static OrderService getInstance() throws SQLException {
         if (instance == null) {
             instance = new OrderService();

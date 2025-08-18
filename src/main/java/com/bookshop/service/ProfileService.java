@@ -8,12 +8,12 @@ public class ProfileService {
     private static ProfileService instance;
     private ProfileDAO profileDAO;
 
-    // Private constructor (Singleton rule)
+   
     private ProfileService() throws SQLException {
         profileDAO = new ProfileDAO();
     }
 
-    // Global access point
+   
     public static ProfileService getInstance() throws SQLException {
         if (instance == null) {
             instance = new ProfileService();
