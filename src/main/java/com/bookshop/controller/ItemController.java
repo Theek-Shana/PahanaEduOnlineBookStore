@@ -1,6 +1,7 @@
 package com.bookshop.controller;
 
 import com.bookshop.model.Item;
+import com.bookshop.model.ItemFactory;
 import com.bookshop.service.ItemService;
 
 import javax.servlet.*;
@@ -151,15 +152,17 @@ public class ItemController extends HttpServlet {
 
             String imagePath = handleFileUpload(imagePart, request);
 
-            Item item = new Item();
-            item.setTitle(title);
-            item.setAuthor(author.isEmpty() ? null : author); // Allow empty author for some categories
-            item.setPrice(price);
-            item.setStockQuantity(stock);
-            item.setDescription(description);
-            item.setCategory(category);
-            item.setImage(imagePath);
-            item.setAddedBy(addedBy);
+            Item item = ItemFactory.createItem(
+            	    title,
+            	    author.isEmpty() ? null : author,
+            	    price,
+            	    stock,
+            	    description,
+            	    category,
+            	    imagePath,
+            	    addedBy
+            	);
+
 
             boolean success = itemService.addItem(item);
             
@@ -362,15 +365,17 @@ public class ItemController extends HttpServlet {
                 imagePath = request.getParameter("existingImage");
             }
 
-            Item item = new Item();
-            item.setItemId(itemId);
-            item.setTitle(title);
-            item.setAuthor(author.isEmpty() ? null : author);
-            item.setPrice(price);
-            item.setStockQuantity(stock);
-            item.setDescription(description);
-            item.setCategory(category);
-            item.setImage(imagePath);
+            Item item = ItemFactory.createItemWithId(
+            	    itemId,
+            	    title,
+            	    author.isEmpty() ? null : author,
+            	    price,
+            	    stock,
+            	    description,
+            	    category,
+            	    imagePath
+            	);
+
 
             itemService.updateItem(item);
             response.sendRedirect(request.getContextPath() + "/item?action=list");
