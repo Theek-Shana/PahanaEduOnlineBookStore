@@ -803,13 +803,7 @@
     </section>
   </div>
 
-  <!-- Footer -->
-  <footer class="footer">
-    <div>
-      <p>&copy; 2025 Pahana Edu Bookshop | Quality Literature for Every Reader</p>
-      <p>Connecting readers with knowledge since day one</p>
-    </div>
-  </footer>
+
 
   <script>
     // FAQ Toggle Functionality
@@ -1104,3 +1098,5 @@
             <li class="faq-item">
               <div class="faq-question" onclick="toggleFAQ(this)">
                 <span>
+                
+                
