@@ -93,7 +93,7 @@
 <body>
 
 <div class="form-container">
-    <h2>✏️ Edit Book</h2>
+    <h2>✏️ Edit Item</h2>
     <form action="<%= request.getContextPath() %>/item?action=update" method="post" enctype="multipart/form-data">
         <input type="hidden" name="itemId" value="<%= item.getItemId() %>" />
 
