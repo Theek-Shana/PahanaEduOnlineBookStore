@@ -13,7 +13,7 @@ import java.util.UUID;
 @WebServlet("/staff-register")  // add URL mapping annotation
 public class RegisterStaffController extends HttpServlet {
 
-    private UserService userService = new UserService();
+	private final UserService userService = UserService.getInstance();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 

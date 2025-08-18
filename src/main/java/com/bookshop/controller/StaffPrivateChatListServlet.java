@@ -13,7 +13,7 @@ import java.util.List;
 @WebServlet("/staff/private-chat-list")
 public class StaffPrivateChatListServlet extends HttpServlet {
 
-    private UserService userService = new UserService();
+	private final UserService userService = UserService.getInstance();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

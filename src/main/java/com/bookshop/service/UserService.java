@@ -7,22 +7,35 @@ import java.sql.SQLException;
 import java.util.List;
 
 public class UserService {
-    private UserDAO userDAO = new UserDAO();
+    private static UserService instance; // 🔹 Singleton instance
+    private UserDAO userDAO;
+
+    // 🔹 Private constructor (no one can call new UserService() from outside)
+    private UserService() {
+        this.userDAO = new UserDAO();
+    }
+
+    // 🔹 Global access point
+    public static synchronized UserService getInstance() {
+        if (instance == null) {
+            instance = new UserService();
+        }
+        return instance;
+    }
+
+    // ---------------- Methods ----------------
 
     public User login(String email, String password) throws SQLException {
         return userDAO.login(email, password);
     }
 
     public boolean registerUser(User user) throws SQLException {
-        // Only generate a new account number if it's not already set
         if (user.getAccountNumber() == null || user.getAccountNumber().trim().isEmpty()) {
             String accountNumber = "ACC" + System.currentTimeMillis();
             user.setAccountNumber(accountNumber);
         }
-
         return userDAO.registerUser(user);
     }
-
 
     public List<User> getUsersByRole(String role) throws SQLException {
         return userDAO.getUsersByRole(role);
@@ -34,18 +47,20 @@ public class UserService {
 
     public void deleteUserById(int id) throws SQLException {
         userDAO.deleteUserById(id);
-    } 
+    }
+
     public void updateUserByAdmin(User user) throws SQLException {
         userDAO.updateUserByAdmin(user);
     }
+
     public User getUserById(int id) throws SQLException {
         return userDAO.getUserById(id);
     }
+
     public List<User> getAllCustomers() throws SQLException {
         return userDAO.getAllCustomers();
     }
 
-    
     public User getUserByEmail(String email) throws SQLException {
         return userDAO.getUserByEmail(email);
     }
@@ -53,5 +68,4 @@ public class UserService {
     public void updatePasswordByEmail(String email, String password) throws SQLException {
         userDAO.updatePasswordByEmail(email, password);
     }
-
 }

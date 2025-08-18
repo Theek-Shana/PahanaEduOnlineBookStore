@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class ChatController {
 
-    private ChatService chatService = new ChatService();
+	   private ChatService chatService = ChatService.getInstance();
 
     public String showChat(String orderIdStr, HttpSession session, Map<String, Object> model) {
         if (session == null) return "redirect:/view/login.jsp";

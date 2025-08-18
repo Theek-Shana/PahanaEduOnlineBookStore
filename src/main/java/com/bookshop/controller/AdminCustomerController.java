@@ -13,7 +13,7 @@ import java.util.List;
 @WebServlet("/admin/customers")
 public class AdminCustomerController extends HttpServlet {
 
-    private UserService userService = new UserService();
+	  private final UserService userService = UserService.getInstance();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)

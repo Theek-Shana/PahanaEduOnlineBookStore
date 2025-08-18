@@ -5,10 +5,20 @@ import com.bookshop.model.ProfileManage;
 import java.sql.SQLException;
 
 public class ProfileService {
+    private static ProfileService instance;
     private ProfileDAO profileDAO;
 
-    public ProfileService() throws SQLException {
+    // Private constructor (Singleton rule)
+    private ProfileService() throws SQLException {
         profileDAO = new ProfileDAO();
+    }
+
+    // Global access point
+    public static ProfileService getInstance() throws SQLException {
+        if (instance == null) {
+            instance = new ProfileService();
+        }
+        return instance;
     }
 
     public ProfileManage getProfile(int userId) throws SQLException {
@@ -18,6 +28,4 @@ public class ProfileService {
     public boolean updateProfile(ProfileManage profile) throws SQLException {
         return profileDAO.updateProfile(profile);
     }
-    
-    
 }

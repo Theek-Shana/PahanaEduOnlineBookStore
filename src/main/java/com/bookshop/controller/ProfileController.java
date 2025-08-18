@@ -21,12 +21,13 @@ public class ProfileController extends HttpServlet {
     @Override
     public void init() throws ServletException {
         try {
-            profileService = new ProfileService();
+            profileService = ProfileService.getInstance();
         } catch (SQLException e) {
-            e.printStackTrace(); // Log the issue
-            profileService = null;
+            e.printStackTrace(); // Better: log properly
+            throw new ServletException("Failed to init ProfileService", e);
         }
     }
+
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
