@@ -23,8 +23,9 @@ public class ItemController extends HttpServlet {
 
     @Override
     public void init() {
-        itemService = new ItemService();
+        itemService = ItemService.getInstance();
     }
+
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)

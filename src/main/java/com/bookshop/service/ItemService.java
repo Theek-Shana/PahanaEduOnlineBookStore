@@ -2,17 +2,16 @@ package com.bookshop.service;
 
 import com.bookshop.dao.ItemDAO;
 import com.bookshop.model.Item;
-
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class ItemService {
 
+    private static ItemService instance; // singleton instance
     private final ItemDAO itemDAO;
 
-    // No-arg constructor: ItemDAO handles DBConnection internally
-    public ItemService() {
+    // private constructor
+    private ItemService() {
         try {
             this.itemDAO = new ItemDAO();
         } catch (SQLException e) {
@@ -20,9 +19,12 @@ public class ItemService {
         }
     }
 
-    // Constructor with DAO injection (for testing or flexibility)
-    public ItemService(ItemDAO itemDAO) {
-        this.itemDAO = itemDAO;
+    // getInstance method
+    public static synchronized ItemService getInstance() {
+        if (instance == null) {
+            instance = new ItemService();
+        }
+        return instance;
     }
 
     public boolean addItem(Item item) {
