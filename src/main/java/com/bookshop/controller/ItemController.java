@@ -226,7 +226,7 @@ public class ItemController extends HttpServlet {
                     return userEmail;
                 }
             } catch (Exception e) {
-                System.out.println("Error getting email from user object: " + e.getMessage());
+                System.out.println("Error getting email from user object: " + e.getMessage()); 
             }
         }
         
