@@ -7,14 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ItemDAO {
-    private Connection conn;
+    private final Connection conn;
 
-    public ItemDAO(Connection conn) {
-        this.conn = conn;
-    }
-
-    public ItemDAO() {
-        // no-arg constructor if needed elsewhere, but methods must open connection manually
+    public ItemDAO() throws SQLException {
+        this.conn = DBConnection.getInstance().getConnection();
     }
 
     public boolean addItem(Item item) {

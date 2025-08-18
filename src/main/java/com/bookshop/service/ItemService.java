@@ -1,31 +1,28 @@
 package com.bookshop.service;
 
-import com.bookshop.dao.DBConnection;
 import com.bookshop.dao.ItemDAO;
 import com.bookshop.model.Item;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ItemService {
 
-    private ItemDAO itemDAO;
+    private final ItemDAO itemDAO;
 
-    // No-arg constructor - opens connection internally
+    // No-arg constructor: ItemDAO handles DBConnection internally
     public ItemService() {
         try {
-            Connection conn = com.bookshop.dao.DBConnection.getInstance().getConnection();
-            this.itemDAO = new ItemDAO(conn);
+            this.itemDAO = new ItemDAO();
         } catch (SQLException e) {
-            throw new RuntimeException("Unable to get DB connection", e);
+            throw new RuntimeException("Unable to initialize ItemDAO", e);
         }
     }
 
-    // Constructor with connection (optional)
-    public ItemService(Connection conn) {
-        this.itemDAO = new ItemDAO(conn);
+    // Constructor with DAO injection (for testing or flexibility)
+    public ItemService(ItemDAO itemDAO) {
+        this.itemDAO = itemDAO;
     }
 
     public boolean addItem(Item item) {
@@ -47,20 +44,12 @@ public class ItemService {
     public boolean deleteItem(int itemId) {
         return itemDAO.deleteItem(itemId);
     }
-    
-     
-    
+
     public List<String> getAllCategories() {
-        try (Connection conn = DBConnection.getInstance().getConnection()) {
-            ItemDAO dao = new ItemDAO(conn);
-            return dao.getAllCategories();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ArrayList<>();
-        }
+        return itemDAO.getAllCategories();
     }
+
     public boolean isItemExist(String title, String category) {
         return itemDAO.isItemExist(title, category);
     }
-
 }
