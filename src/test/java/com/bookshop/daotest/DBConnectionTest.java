@@ -1,12 +1,9 @@
 package com.bookshop.daotest;
 
-import com.bookshop.dao.DBConnection;
 import org.junit.jupiter.api.Test;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DBConnectionTest {
@@ -24,9 +21,9 @@ public class DBConnectionTest {
         try (Connection conn = DriverManager.getConnection(url, username, password)) {
             assertNotNull(conn, "Connection should not be null");
             assertFalse(conn.isClosed(), "Connection should be open");
-            System.out.println("Successful connection test passed!");
+            System.out.println("✅ Successful connection test passed!");
         } catch (SQLException e) {
-            fail("❌ Connection failed, but it should have succeeded: " + e.getMessage());
+            fail("❌ Connection failed: " + e.getMessage());
         }
     }
 }
