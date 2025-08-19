@@ -86,7 +86,7 @@ public class ItemDAOTest {
         assertTrue(categories.size() > 0, "There should be at least one category");
     }
 
-    @Test
+    @Test 
     @Order(4)
     public void testIsItemExist() throws SQLException {
         conn.setAutoCommit(false);

@@ -96,7 +96,7 @@ class ItemServiceTest {
 
     @Test
     void testIsItemExistFails() {
-        String title = "Java Book";
+        String title = "Java Book"; 
         String category = "Fiction";
 
         // Mock DAO to return true (item exists)

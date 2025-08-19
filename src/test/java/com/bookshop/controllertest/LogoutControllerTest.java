@@ -38,6 +38,6 @@ class LogoutControllerTest {
         verify(session).invalidate();
         verify(response).sendRedirect("/bookshop/view/login.jsp");
     }
-
+ 
   
 }

@@ -70,6 +70,6 @@ public class UserDAOTest {
         boolean result = userDAO.registerUser(duplicateUser);
         assertFalse(result, "Duplicate email registration should fail");
     }
-
+ 
 
 }

@@ -84,7 +84,7 @@ public class OrderDAOTest {
             conn.setAutoCommit(true); // restore auto-commit
         }
     }
-
+ 
     @Test
     @org.junit.jupiter.api.Order(5)
     public void testIntentionalFail() throws SQLException {

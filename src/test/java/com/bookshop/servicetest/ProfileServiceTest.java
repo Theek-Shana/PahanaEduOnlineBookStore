@@ -49,6 +49,6 @@ class ProfileServiceTest {
         verify(mockDAO, times(1)).getProfile(1);
     }
 
-    // ---------- Test 2: updateProfile ----------
+    // ---------- Test 2: updateProfile ---------- 
   
 }
