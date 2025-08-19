@@ -21,7 +21,7 @@ public class DBConnection {
     }
 
     public Connection getConnection() throws SQLException {
-        // return a new connection each time
+       
         return DriverManager.getConnection(url, username, password);
     }
 
