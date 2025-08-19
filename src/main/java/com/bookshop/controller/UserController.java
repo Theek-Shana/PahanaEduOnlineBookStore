@@ -147,7 +147,10 @@ public class UserController extends HttpServlet {
                             resp.sendRedirect(req.getContextPath() + "/view/login.jsp?error=InvalidRole");
                     }
                 } else {
-                    resp.sendRedirect(req.getContextPath() + "/view/login.jsp?error=InvalidCredentials");
+                	req.setAttribute("errorMessage", "Invalid email or password!");
+                	req.getRequestDispatcher("/view/login.jsp").forward(req, resp);
+
+
                 }
             }
 
