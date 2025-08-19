@@ -22,7 +22,7 @@ public class DBConnectionTest {
             assertNotNull(conn, "Connection should not be null");
             assertFalse(conn.isClosed(), "Connection should be open");
             System.out.println("✅ Successful connection test passed!");
-        } catch (SQLException e) {
+        } catch (SQLException e) {  
             fail("❌ Connection failed: " + e.getMessage());
         }
     }
