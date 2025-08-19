@@ -5,6 +5,7 @@ on:
     branches: [ "main", "master" ]
   pull_request:
     branches: [ "main", "master" ]
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -45,9 +46,6 @@ jobs:
             echo "Waiting for MySQL..."
             sleep 5
           done
-
-      - name: Build and test with Maven
-        run: mvn clean test
 
       - name: Build and test with Maven
         run: mvn clean test
