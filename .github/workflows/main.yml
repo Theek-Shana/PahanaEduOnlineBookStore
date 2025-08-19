@@ -10,28 +10,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: testdb
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping --silent"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-
-    env:
-      DB_URL: jdbc:mysql://127.0.0.1:3306/testdb
-      DB_USERNAME: root
-      DB_PASSWORD: root
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: List repo files after checkout
+        run: ls -la
+
+      - name: List files in project folder
+        run: ls -la
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -39,13 +26,5 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Wait for MySQL to be ready
-        run: |
-          for i in {1..10}; do
-            mysqladmin ping -h 127.0.0.1 -uroot -proot && break
-            echo "Waiting for MySQL..."
-            sleep 5
-          done
-
-      - name: Build and test with Maven
-        run: mvn clean test
+      - name: Build with Maven
+        run: mvn -B package
