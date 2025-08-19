@@ -193,86 +193,16 @@ public class ItemController extends HttpServlet {
     }
 
     private String getAddedByFromSession(HttpSession session) {
-        if (session == null) {
-            System.out.println("Session is null");
-            return "unknown";
+        if (session == null) return "unknown";
+
+        Object userObj = session.getAttribute("user"); 
+        if (userObj != null && userObj instanceof com.bookshop.model.User) {
+            String email = ((com.bookshop.model.User) userObj).getEmail();
+            if (email != null && !email.trim().isEmpty()) {
+                return email;
+            }
         }
 
-        // Try different possible session attribute names
-        String userEmail = null;
-        
-        // Method 1: Try getting email directly from session
-        userEmail = (String) session.getAttribute("userEmail");
-        if (userEmail != null && !userEmail.trim().isEmpty()) {
-            return userEmail;
-        }
-        
-        // Method 2: Try getting from user object
-        Object user = session.getAttribute("user");
-        if (user != null) {
-            try {
-                // Try casting to User class and get email
-                if (user instanceof com.bookshop.model.User) {
-                    userEmail = ((com.bookshop.model.User) user).getEmail();
-                    if (userEmail != null && !userEmail.trim().isEmpty()) {
-                        return userEmail;
-                    }
-                }
-                
-                // Try reflection to get email if the class structure is different
-                java.lang.reflect.Method getEmailMethod = user.getClass().getMethod("getEmail");
-                userEmail = (String) getEmailMethod.invoke(user);
-                if (userEmail != null && !userEmail.trim().isEmpty()) {
-                    return userEmail;
-                }
-            } catch (Exception e) {
-                System.out.println("Error getting email from user object: " + e.getMessage()); 
-            }
-        }
-        
-        // Method 3: Try other common session attribute names
-        String[] possibleEmailKeys = {"email", "loginEmail", "currentUser", "loggedInUser"};
-        for (String key : possibleEmailKeys) {
-            Object value = session.getAttribute(key);
-            if (value != null) {
-                if (value instanceof String) {
-                    userEmail = (String) value;
-                    if (userEmail != null && !userEmail.trim().isEmpty()) {
-                        return userEmail;
-                    }
-                }
-            }
-        }
-        
-        // Method 4: Try getting userType and user combination
-        String userType = (String) session.getAttribute("userType");
-        System.out.println("User type: " + userType + ", User object: " + (user != null ? user.getClass().getName() : "null"));
-        
-        if (userType != null && user != null) {
-            try {
-                if ("staff".equals(userType) || "admin".equals(userType) || "customer".equals(userType)) {
-                    if (user instanceof com.bookshop.model.User) {
-                        userEmail = ((com.bookshop.model.User) user).getEmail();
-                        if (userEmail != null && !userEmail.trim().isEmpty()) {
-                            return userEmail;
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                System.out.println("Error in userType-based retrieval: " + e.getMessage());
-            }
-        }
-        
-        // Log session attributes for debugging
-        System.out.println("Session attributes:");
-        java.util.Enumeration<String> attributeNames = session.getAttributeNames();
-        while (attributeNames.hasMoreElements()) {
-            String attributeName = attributeNames.nextElement();
-            Object attributeValue = session.getAttribute(attributeName);
-            System.out.println("  " + attributeName + " = " + attributeValue + " (" + 
-                             (attributeValue != null ? attributeValue.getClass().getName() : "null") + ")");
-        }
-        
         return "unknown";
     }
 
