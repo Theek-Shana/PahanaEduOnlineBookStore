@@ -137,7 +137,7 @@
 </head>
 <body>
 
-<h2>📚 Book List</h2>
+<h2> Item List</h2>
 
 <div class="filter-container">
     <input type="text" id="searchInput" placeholder="🔍 Search by Title...">
