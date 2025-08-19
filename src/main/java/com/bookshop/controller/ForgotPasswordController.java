@@ -20,7 +20,7 @@ public class ForgotPasswordController extends HttpServlet {
 	private final UserService userService = UserService.getInstance();
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+	public void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         String action = req.getParameter("action");
         

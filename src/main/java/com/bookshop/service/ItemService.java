@@ -54,4 +54,15 @@ public class ItemService {
     public boolean isItemExist(String title, String category) {
         return itemDAO.isItemExist(title, category);
     }
+    
+    
+    
+    
+    
+    
+    // New constructor for testing
+    public ItemService(ItemDAO mockDAO) {
+        this.itemDAO = mockDAO;
+    }
+    
 }

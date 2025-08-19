@@ -68,4 +68,15 @@ public class OrderService {
             return false;
         }
     }
+    
+    
+    
+    
+    
+    
+    
+    // --------- Add this constructor for testing only ---------
+    public OrderService(OrderDAO orderDAO) {
+        this.orderDAO = orderDAO;
+    }
 }

@@ -23,25 +23,26 @@ public class StaffOrderController extends HttpServlet {
     public void init() throws ServletException {
         try {
             Connection conn = DBConnection.getInstance().getConnection();
-
-            userDAO = new UserDAO();       // no-arg constructor
-            orderDAO = new OrderDAO(conn); // pass connection if desired
-            itemDAO = new ItemDAO();       // no-arg constructor only
-
+            userDAO = new UserDAO();
+            orderDAO = new OrderDAO(conn);
+            itemDAO = new ItemDAO();
         } catch (SQLException e) {
             throw new ServletException("Failed to initialize DAOs", e);
         }
     }
 
-
-
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String path = req.getServletPath();
+        User loggedInUser = getLoggedInUser(req);
+        if (!isStaffOrAdmin(loggedInUser)) {
+            resp.sendRedirect(req.getContextPath() + "/view/login.jsp");
+            return;
+        }
 
+        String path = req.getServletPath();
         switch (path) {
             case "/staff/orders":
-                handleOrdersList(req, resp);
+                handleOrdersList(req, resp, loggedInUser);
                 break;
             case "/staff/createOrder":
                 handleCreateOrderGet(req, resp);
@@ -56,26 +57,42 @@ public class StaffOrderController extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String path = req.getServletPath();
+        User loggedInUser = getLoggedInUser(req);
+        if (!isStaffOrAdmin(loggedInUser)) {
+            resp.sendRedirect(req.getContextPath() + "/view/login.jsp");
+            return;
+        }
 
+        String path = req.getServletPath();
         switch (path) {
             case "/staff/orders":
-                handleOrdersPost(req, resp);
+                handleOrdersPost(req, resp, loggedInUser);
                 break;
             case "/staff/createOrder":
                 handleCreateOrderPost(req, resp);
                 break;
             case "/staff/addOrderItems":
-                handleAddOrderItemsPost(req, resp);
+                handleAddOrderItemsPost(req, resp, loggedInUser);
                 break;
             default:
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
     }
 
-    // ------------- GET handlers -------------------
+    // ---------- Helper Methods ----------
+    private User getLoggedInUser(HttpServletRequest req) {
+        HttpSession session = req.getSession(false);
+        return (session != null) ? (User) session.getAttribute("user") : null;
+    }
 
-    private void handleOrdersList(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    private boolean isStaffOrAdmin(User user) {
+        if (user == null) return false;
+        String role = user.getRole();
+        return "staff".equalsIgnoreCase(role) || "admin".equalsIgnoreCase(role);
+    }
+
+    // ---------- GET Handlers ----------
+    private void handleOrdersList(HttpServletRequest req, HttpServletResponse resp, User user) throws ServletException, IOException {
         try {
             List<Order> orders = orderDAO.getAllOrders();
             req.setAttribute("orders", orders);
@@ -99,7 +116,6 @@ public class StaffOrderController extends HttpServlet {
 
     private void handleAddOrderItemsGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String customerIdStr = req.getParameter("customerId");
-
         if (customerIdStr == null || customerIdStr.isEmpty()) {
             resp.sendRedirect(req.getContextPath() + "/staff/createOrder");
             return;
@@ -114,30 +130,19 @@ public class StaffOrderController extends HttpServlet {
         }
 
         List<Item> items = itemDAO.getAllItems();
-		req.setAttribute("items", items);
-		req.setAttribute("customerId", customerId);
-		req.getRequestDispatcher("/view/staff_add_order_items.jsp").forward(req, resp);
+        req.setAttribute("items", items);
+        req.setAttribute("customerId", customerId);
+        req.getRequestDispatcher("/view/staff_add_order_items.jsp").forward(req, resp);
     }
 
-    // ------------- POST handlers -------------------
-
-    private void handleOrdersPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    // ---------- POST Handlers ----------
+    private void handleOrdersPost(HttpServletRequest req, HttpServletResponse resp, User loggedInUser) throws ServletException, IOException {
         try {
             int orderId = Integer.parseInt(req.getParameter("order_id"));
             String status = req.getParameter("status");
             String message = req.getParameter("message");
 
-            HttpSession session = req.getSession(false);
-            User loggedInUser = (session != null) ? (User) session.getAttribute("user") : null;
-
-            if (loggedInUser == null || !"staff".equalsIgnoreCase(loggedInUser.getRole())) {
-                req.setAttribute("error", "Staff not logged in.");
-                handleOrdersList(req, resp);
-                return;
-            }
-
-            int staffId = loggedInUser.getId();
-            boolean updated = orderDAO.updateOrderStatus(orderId, status, message, staffId);
+            boolean updated = orderDAO.updateOrderStatus(orderId, status, message, loggedInUser.getId());
 
             if (updated) {
                 req.setAttribute("success", "Order updated successfully.");
@@ -150,7 +155,7 @@ public class StaffOrderController extends HttpServlet {
             e.printStackTrace();
             req.setAttribute("error", "Database error occurred while updating order.");
         }
-        handleOrdersList(req, resp);
+        handleOrdersList(req, resp, loggedInUser);
     }
 
     private void handleCreateOrderPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -162,15 +167,7 @@ public class StaffOrderController extends HttpServlet {
         resp.sendRedirect(req.getContextPath() + "/staff/addOrderItems?customerId=" + customerIdStr);
     }
 
-    private void handleAddOrderItemsPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        HttpSession session = req.getSession(false);
-        User loggedInUser = (session != null) ? (User) session.getAttribute("user") : null;
-
-        if (loggedInUser == null || !"staff".equalsIgnoreCase(loggedInUser.getRole())) {
-            resp.sendRedirect(req.getContextPath() + "/view/login.jsp");
-            return;
-        }
-
+    private void handleAddOrderItemsPost(HttpServletRequest req, HttpServletResponse resp, User loggedInUser) throws ServletException, IOException {
         try {
             String customerIdStr = req.getParameter("customerId");
             if (customerIdStr == null || customerIdStr.isEmpty()) {
@@ -181,14 +178,9 @@ public class StaffOrderController extends HttpServlet {
 
             int customerId = Integer.parseInt(customerIdStr);
 
-            // Use exact parameter names with brackets [] as in the JSP form
             String[] itemIds = req.getParameterValues("itemId[]");
             String[] quantities = req.getParameterValues("quantity[]");
             String[] discounts = req.getParameterValues("discount[]");
-
-            System.out.println("DEBUG: itemIds = " + java.util.Arrays.toString(itemIds));
-            System.out.println("DEBUG: quantities = " + java.util.Arrays.toString(quantities));
-            System.out.println("DEBUG: discounts = " + java.util.Arrays.toString(discounts));
 
             if (itemIds == null || quantities == null || itemIds.length != quantities.length) {
                 req.setAttribute("error", "Invalid order submission.");
@@ -219,9 +211,7 @@ public class StaffOrderController extends HttpServlet {
                 Item item = itemDAO.getItemById(itemId);
                 if (item == null) continue;
 
-                double originalPrice = item.getPrice();
-                double discountedPricePerUnit = originalPrice * (1 - discount / 100.0);
-
+                double discountedPricePerUnit = item.getPrice() * (1 - discount / 100.0);
                 totalAmount += discountedPricePerUnit * qty;
 
                 OrderItem orderItem = new OrderItem();
@@ -237,7 +227,7 @@ public class StaffOrderController extends HttpServlet {
                 handleAddOrderItemsGet(req, resp);
                 return;
             }
- 
+
             Order order = new Order();
             order.setUserId(customerId);
             order.setStaffId(loggedInUser.getId());
@@ -261,6 +251,4 @@ public class StaffOrderController extends HttpServlet {
             handleAddOrderItemsGet(req, resp);
         }
     }
-
-
 }

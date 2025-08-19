@@ -121,17 +121,31 @@ public class UserDAO {
     }
 
     public void updateUserByAdmin(User user) throws SQLException {
-        String hashedPassword = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
-        String sql = "UPDATE users SET fullname = ?, email = ?, mobile = ?, password = ? WHERE id = ?";
-        try (Connection con = getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, user.getFullname());
-            ps.setString(2, user.getEmail());
-            ps.setString(3, user.getMobile());
-            ps.setString(4, hashedPassword);
-            ps.setInt(5, user.getId());
-            ps.executeUpdate();
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            // Update with new password
+            String hashedPassword = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
+            String sql = "UPDATE users SET fullname = ?, email = ?, mobile = ?, password = ? WHERE id = ?";
+            try (Connection con = getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setString(1, user.getFullname());
+                ps.setString(2, user.getEmail());
+                ps.setString(3, user.getMobile());
+                ps.setString(4, hashedPassword);
+                ps.setInt(5, user.getId());
+                ps.executeUpdate();
+            }
+        } else {
+            // Update without changing password
+            String sql = "UPDATE users SET fullname = ?, email = ?, mobile = ? WHERE id = ?";
+            try (Connection con = getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setString(1, user.getFullname());
+                ps.setString(2, user.getEmail());
+                ps.setString(3, user.getMobile());
+                ps.setInt(4, user.getId());
+                ps.executeUpdate();
+            }
         }
     }
+
 
 
     public void deleteUserById(int id) throws SQLException {
