@@ -18,14 +18,6 @@ class OrderServiceTest {
     private OrderDAO mockDAO;
     private OrderService orderService;
 
-    @BeforeEach
-    void setUp() {
-        // Initialize mocks
-        mockDAO = mock(OrderDAO.class);
-
-        // Inject mock into service
-        orderService = new OrderService(mockDAO);
-    }
 
     @Test
     void testGetAllOrders() throws SQLException {
@@ -41,6 +33,6 @@ class OrderServiceTest {
         // Assertions
         assertEquals(2, orders.size());
         verify(mockDAO, times(1)).getAllOrders();
-    }
+    } 
 }
    
