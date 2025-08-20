@@ -8,12 +8,16 @@ public class ProfileService {
     private static ProfileService instance;
     private ProfileDAO profileDAO;
 
-   
+    // Production constructor (no arguments) uses real DAO
     private ProfileService() throws SQLException {
-        profileDAO = new ProfileDAO();
+        this.profileDAO = new ProfileDAO();
     }
 
-   
+    // Test constructor allows injecting a mock DAO
+    public ProfileService(ProfileDAO dao) {
+        this.profileDAO = dao;
+    }
+
     public static ProfileService getInstance() throws SQLException {
         if (instance == null) {
             instance = new ProfileService();

@@ -5,38 +5,22 @@ import com.bookshop.model.ProfileManage;
 import com.bookshop.service.ProfileService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import java.lang.reflect.Field;
-import java.sql.SQLException;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class ProfileServiceTest {
 
-    @Mock
     private ProfileDAO mockDAO;
-
     private ProfileService profileService;
 
     @BeforeEach
-    void setUp() throws SQLException, NoSuchFieldException, IllegalAccessException {
-        MockitoAnnotations.openMocks(this);
-
-        // Get the singleton instance
-        profileService = ProfileService.getInstance();
-
-        // Inject mockDAO using reflection (safe, doesn’t touch real DB)
-        Field daoField = ProfileService.class.getDeclaredField("profileDAO");
-        daoField.setAccessible(true);
-        daoField.set(profileService, mockDAO);
+    void setUp() {
+        mockDAO = mock(ProfileDAO.class);
+        profileService = new ProfileService(mockDAO); // inject mock directly
     }
 
-    // ---------- Test 1: getProfile ----------
     @Test
-    void testGetProfile() throws SQLException {
+    void testGetProfile() throws Exception {
         ProfileManage profile = new ProfileManage();
         profile.setFullname("John Doe");
 
@@ -49,9 +33,8 @@ class ProfileServiceTest {
         verify(mockDAO, times(1)).getProfile(1);
     }
 
-    // ---------- Test 2: updateProfile ----------
     @Test
-    void testUpdateProfile() throws SQLException {
+    void testUpdateProfile() throws Exception {
         ProfileManage profile = new ProfileManage();
         profile.setFullname("Jane Doe");
 
@@ -59,10 +42,7 @@ class ProfileServiceTest {
 
         boolean updated = profileService.updateProfile(profile);
 
-        assertTrue(updated, "Profile should be updated successfully");
+        assertTrue(updated);
         verify(mockDAO, times(1)).updateProfile(profile);
     }
-
-    // Add more tests here following the same pattern
 }
-   
