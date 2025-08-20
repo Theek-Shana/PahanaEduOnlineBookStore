@@ -96,7 +96,7 @@ public class OrderDAOTest {
         }
     }
 
-    @Test
+    @Test 
     @Order(5)
     public void testIntentionalFail() throws SQLException {
         // Intentional fail to show red mark in JUnit

@@ -65,7 +65,7 @@ public class ProfileDAOTest {
         ProfileManage profile = profileDAO.getProfile(testProfile.getId());
         assertEquals("Temporary Name", profile.getFullname());
     }
-
+ 
     @AfterAll
     public static void cleanup() throws SQLException {
         // Restore original data for ID 40

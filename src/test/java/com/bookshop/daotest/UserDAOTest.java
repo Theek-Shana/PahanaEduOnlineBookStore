@@ -81,3 +81,4 @@ public class UserDAOTest {
         assertFalse(result, "Duplicate email registration should fail");
     }
 }
+ 
