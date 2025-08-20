@@ -74,3 +74,4 @@ public class ProfileDAOTest {
         profileDAO.updateProfile(testProfile);
     }
 }
+ 

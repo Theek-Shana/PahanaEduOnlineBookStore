@@ -75,7 +75,7 @@ class ForgotPasswordControllerTest {
     void testResetPasswordSessionExpired() throws Exception {
         when(request.getParameter("action")).thenReturn("reset");
         when(request.getSession(false)).thenReturn(null);
-
+ 
         controller.doPost(request, response);
 
         verify(response).sendRedirect(contains("forgot-password.jsp?error=SessionExpired"));

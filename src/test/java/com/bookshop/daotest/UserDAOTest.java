@@ -42,7 +42,7 @@ public class UserDAOTest {
         conn.setAutoCommit(true);
     }
 
-    @Test
+    @Test 
     @Order(1)
     public void testRegisterUserSuccess() throws SQLException {
         // Generate a unique email for this test run
