@@ -10,25 +10,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    services:
-      mysql:
-        image: mysql:8
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: bookstore_test
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h localhost -uroot -proot"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=10
-
-    env:
-      DB_URL: jdbc:mysql://127.0.0.1:3306/bookstore_test?useSSL=false&allowPublicKeyRetrieval=true
-      DB_USERNAME: root
-      DB_PASSWORD: root
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -39,20 +20,5 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Wait for MySQL to be ready
-        run: |
-          for i in {1..20}; do
-            if mysqladmin ping -h127.0.0.1 -uroot -proot --silent; then
-              echo "✅ MySQL is ready!"
-              break
-            fi
-            echo "⏳ Waiting for MySQL..."
-            sleep 5
-          done
-
-      - name: Build and run unit tests (skip integration tests)
-        run: mvn -B clean test -DskipITs=true
-        env:
-          DB_URL: ${{ env.DB_URL }}
-          DB_USERNAME: ${{ env.DB_USERNAME }}
-          DB_PASSWORD: ${{ env.DB_PASSWORD }}
+      - name: Build and run unit tests only
+        run: mvn -B clean test -DskipITs
