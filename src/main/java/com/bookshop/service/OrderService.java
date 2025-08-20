@@ -2,7 +2,6 @@ package com.bookshop.service;
 
 import com.bookshop.dao.OrderDAO;
 import com.bookshop.model.Order;
-
 import java.sql.SQLException;
 import java.util.List;
 
@@ -11,12 +10,16 @@ public class OrderService {
     private static OrderService instance;
     private final OrderDAO orderDAO;
 
-  
+    // Production singleton constructor
     private OrderService() throws SQLException {
         this.orderDAO = new OrderDAO();
     }
 
-  
+    // Test constructor: inject mock DAO
+    public OrderService(OrderDAO dao) {
+        this.orderDAO = dao;
+    }
+
     public static OrderService getInstance() throws SQLException {
         if (instance == null) {
             instance = new OrderService();
@@ -24,11 +27,6 @@ public class OrderService {
         return instance;
     }
 
-    /**
-     * Place a new order.
-     * @param order The order object
-     * @return true if order placed successfully
-     */
     public boolean placeOrder(Order order) {
         try {
             int orderId = orderDAO.placeOrder(order);
@@ -39,10 +37,6 @@ public class OrderService {
         }
     }
 
-    /**
-     * Get all orders.
-     * @return List of orders
-     */
     public List<Order> getAllOrders() {
         try {
             return orderDAO.getAllOrders();
@@ -52,14 +46,6 @@ public class OrderService {
         }
     }
 
-    /**
-     * Update order status.
-     * @param orderId ID of the order
-     * @param status New status
-     * @param message Optional message
-     * @param staffId Staff who updated
-     * @return true if update successful
-     */
     public boolean updateOrderStatus(int orderId, String status, String message, int staffId) {
         try {
             return orderDAO.updateOrderStatus(orderId, status, message, staffId);
@@ -68,12 +54,4 @@ public class OrderService {
             return false;
         }
     }
-    
-    
-    
-    
-    
-    
-    
-   
 }
