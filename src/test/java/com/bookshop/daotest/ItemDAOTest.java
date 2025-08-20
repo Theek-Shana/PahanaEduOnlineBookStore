@@ -109,4 +109,4 @@ public class ItemDAOTest {
         Item item = itemDAO.getItemById(-9999); // unlikely ID
         assertNull(item, "Item with invalid ID should return null");
     }
-} 
+}  

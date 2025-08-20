@@ -1,3 +1,5 @@
+package com.bookshop.controllertest;
+
 import com.bookshop.controller.ForgotPasswordController;
 import com.bookshop.service.UserService;
 import org.junit.jupiter.api.BeforeEach;

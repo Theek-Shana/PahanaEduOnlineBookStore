@@ -62,7 +62,7 @@ public class UserDAOTest {
         // Save this email for potential duplicate test later
         TEST_EMAIL_FOR_DUPLICATE = uniqueEmail;
     }
-
+ 
     @Test
     @Order(2)
     public void testRegisterDuplicateUserFails() throws SQLException {

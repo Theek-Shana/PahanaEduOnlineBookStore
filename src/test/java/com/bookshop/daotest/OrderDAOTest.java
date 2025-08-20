@@ -103,4 +103,4 @@ public class OrderDAOTest {
         List<com.bookshop.model.Order> orders = orderDAO.getAllOrders();
         assertEquals(-1, orders.size(), "This test is supposed to fail intentionally");
     }
-} 
+}  
