@@ -6,8 +6,6 @@ import com.bookshop.service.OrderService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,21 +16,32 @@ class OrderServiceTest {
     private OrderDAO mockDAO;
     private OrderService orderService;
 
+    @BeforeEach
+    void setUp() {
+        mockDAO = mock(OrderDAO.class);          // create a mock DAO
+        orderService = new OrderService(mockDAO); // inject mock into service
+    }
 
     @Test
-    void testGetAllOrders() throws SQLException {
-        Order order1 = new Order();
-        Order order2 = new Order();
+    void testGetAllOrders() throws Exception {
+        List<Order> fakeOrders = List.of(new Order(), new Order());
+        when(mockDAO.getAllOrders()).thenReturn(fakeOrders);
 
-        // Mock DAO response
-        when(mockDAO.getAllOrders()).thenReturn(Arrays.asList(order1, order2));
+        List<Order> result = orderService.getAllOrders();
 
-        // Call service method
-        List<Order> orders = orderService.getAllOrders();
-
-        // Assertions
-        assertEquals(2, orders.size());
+        assertNotNull(result);
+        assertEquals(2, result.size());
         verify(mockDAO, times(1)).getAllOrders();
-    } 
+    }
+
+    @Test
+    void testPlaceOrder() throws Exception {
+        Order order = new Order();
+        when(mockDAO.placeOrder(order)).thenReturn(123);
+
+        boolean placed = orderService.placeOrder(order);
+
+        assertTrue(placed);
+        verify(mockDAO, times(1)).placeOrder(order);
+    }
 }
-   
