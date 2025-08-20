@@ -107,7 +107,8 @@ class ItemControllerTest {
         controller.doPost(request, response);
 
         verify(itemService, never()).addItem(any(Item.class));
-        verify(request).setAttribute(eq("errorMessage"), eq("Item already exists in this category."));
+        verify(request).setAttribute(eq("error"), eq("All required fields must be filled!"));
+
         verify(dispatcher).forward(request, response);
     }
 

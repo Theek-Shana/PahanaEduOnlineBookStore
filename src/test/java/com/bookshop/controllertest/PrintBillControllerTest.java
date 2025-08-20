@@ -61,7 +61,8 @@ class PrintBillControllerTest {
         controller.doGet(request, response);
 
         // Realistic failure: verify correct error sent
-        verify(response, times(1)).sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing orderId");
+        verify(response, times(1)).sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing orderId parameter");
+
     }
 
     // ---------- Test 3: Order not found ----------
