@@ -47,4 +47,4 @@ jobs:
           done
 
       - name: Build and test with Maven
-        run: mvn clean test
+        run: mvn -B clean test
