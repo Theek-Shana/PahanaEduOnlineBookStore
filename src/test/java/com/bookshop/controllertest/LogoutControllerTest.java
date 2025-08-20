@@ -27,7 +27,7 @@ class LogoutControllerTest {
         session = mock(HttpSession.class);
     }
 
-    // ---------- Session exists ----------
+    // ---------- Test 1: Session exists ----------
     @Test
     void testLogoutWithSession() throws IOException, ServletException {
         when(request.getSession(false)).thenReturn(session);
@@ -35,9 +35,19 @@ class LogoutControllerTest {
 
         controller.doGet(request, response);
 
-        verify(session).invalidate();
-        verify(response).sendRedirect("/bookshop/view/login.jsp");
+        verify(session, times(1)).invalidate();
+        verify(response, times(1)).sendRedirect("/bookshop/view/login.jsp");
     }
- 
-  
+
+    // ---------- Test 2: No session exists ----------
+    @Test
+    void testLogoutWithoutSession() throws IOException, ServletException {
+        when(request.getSession(false)).thenReturn(null);
+        when(request.getContextPath()).thenReturn("/bookshop");
+
+        controller.doGet(request, response);
+
+        // No session to invalidate, but should still redirect
+        verify(response, times(1)).sendRedirect("/bookshop/view/login.jsp");
+    }
 }

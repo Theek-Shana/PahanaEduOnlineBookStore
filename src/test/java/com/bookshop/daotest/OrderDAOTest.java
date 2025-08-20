@@ -7,6 +7,7 @@ import org.junit.jupiter.api.*;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,14 +17,30 @@ import static org.junit.jupiter.api.Assertions.*;
 public class OrderDAOTest {
 
     private static OrderDAO orderDAO;
+    private static Connection conn;
 
     @BeforeAll
-    public static void setup() throws SQLException {
+    public static void setup() throws SQLException, NoSuchFieldException, IllegalAccessException {
         orderDAO = new OrderDAO();
+
+        // Get private connection from OrderDAO via reflection
+        Field connField = orderDAO.getClass().getDeclaredField("conn");
+        connField.setAccessible(true);
+        conn = (Connection) connField.get(orderDAO);
+        assertNotNull(conn, "Connection should exist");
+    }
+
+    @BeforeEach
+    void cleanDatabase() throws SQLException {
+        // Clear orders and order_items before each test to isolate tests
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute("DELETE FROM order_items");
+            stmt.execute("DELETE FROM orders");
+        }
     }
 
     @Test
-    @org.junit.jupiter.api.Order(1)
+    @Order(1)
     public void testGetAllOrders() throws SQLException {
         List<com.bookshop.model.Order> orders = orderDAO.getAllOrders();
         assertNotNull(orders, "Orders list should not be null");
@@ -31,7 +48,7 @@ public class OrderDAOTest {
     }
 
     @Test
-    @org.junit.jupiter.api.Order(2)
+    @Order(2)
     public void testGetOrdersByUserId() throws SQLException {
         int testUserId = 1; // safe existing user ID
         List<com.bookshop.model.Order> orders = orderDAO.getOrdersByUserId(testUserId);
@@ -40,7 +57,7 @@ public class OrderDAOTest {
     }
 
     @Test
-    @org.junit.jupiter.api.Order(3)
+    @Order(3)
     public void testGetOrderById() throws SQLException {
         int testOrderId = 1; // safe existing order ID
         com.bookshop.model.Order testOrder = orderDAO.getOrderById(testOrderId);
@@ -49,14 +66,8 @@ public class OrderDAOTest {
     }
 
     @Test
-    @org.junit.jupiter.api.Order(4)
-    public void testSafePlaceOrderRollback() throws SQLException, NoSuchFieldException, IllegalAccessException {
-        // simulate placing an order without committing to DB
-        Field connField = orderDAO.getClass().getDeclaredField("conn");
-        connField.setAccessible(true);
-        Connection conn = (Connection) connField.get(orderDAO);
-        assertNotNull(conn, "Connection should exist");
-
+    @Order(4)
+    public void testSafePlaceOrderRollback() throws SQLException {
         conn.setAutoCommit(false); // start transaction
 
         try {
@@ -84,9 +95,9 @@ public class OrderDAOTest {
             conn.setAutoCommit(true); // restore auto-commit
         }
     }
- 
+
     @Test
-    @org.junit.jupiter.api.Order(5)
+    @Order(5)
     public void testIntentionalFail() throws SQLException {
         // Intentional fail to show red mark in JUnit
         List<com.bookshop.model.Order> orders = orderDAO.getAllOrders();

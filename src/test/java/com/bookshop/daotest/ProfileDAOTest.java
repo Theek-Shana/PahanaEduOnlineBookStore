@@ -29,6 +29,14 @@ public class ProfileDAOTest {
         originalPassword = testProfile.getPassword();
     }
 
+    @BeforeEach
+    void resetProfileData() throws SQLException {
+        // Reset test profile to original before each test
+        testProfile.setFullname(originalFullname);
+        testProfile.setPassword(originalPassword);
+        profileDAO.updateProfile(testProfile);
+    }
+
     @Test
     @Order(1)
     public void testGetProfileSuccess() throws SQLException {
@@ -57,11 +65,6 @@ public class ProfileDAOTest {
         ProfileManage profile = profileDAO.getProfile(testProfile.getId());
         assertEquals("Temporary Name", profile.getFullname());
     }
-
-
-
-    
-
 
     @AfterAll
     public static void cleanup() throws SQLException {

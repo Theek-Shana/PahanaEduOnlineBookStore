@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.sql.SQLException;
 
 import static org.mockito.Mockito.*;
 
@@ -26,19 +25,20 @@ class PrintBillControllerTest {
 
     @BeforeEach
     void setUp() throws Exception {
+        // Initialize controller and mocks
         controller = new PrintBillController();
         orderDAO = mock(OrderDAO.class);
         request = mock(HttpServletRequest.class);
         response = mock(HttpServletResponse.class);
         dispatcher = mock(RequestDispatcher.class);
 
-        // Inject mocked DAO into controller using reflection
+        // Inject mocked DAO using reflection
         var field = PrintBillController.class.getDeclaredField("orderDAO");
         field.setAccessible(true);
         field.set(controller, orderDAO);
     }
 
-    // ---------- Success Case: Order exists ----------
+    // ---------- Test 1: Order exists ----------
     @Test
     void testPrintBillSuccess() throws Exception {
         when(request.getParameter("orderId")).thenReturn("1");
@@ -48,23 +48,31 @@ class PrintBillControllerTest {
 
         controller.doGet(request, response);
 
-        verify(orderDAO).getOrderById(1);
-        verify(request).setAttribute("order", order);
-        verify(dispatcher).forward(request, response);
+        verify(orderDAO, times(1)).getOrderById(1);
+        verify(request, times(1)).setAttribute("order", order);
+        verify(dispatcher, times(1)).forward(request, response);
     }
 
-
+    // ---------- Test 2: Missing orderId ----------
     @Test
-    void testMissingOrderIdFails() throws IOException, ServletException {
+    void testMissingOrderId() throws IOException, ServletException {
         when(request.getParameter("orderId")).thenReturn(null);
 
         controller.doGet(request, response);
 
-        // Intentionally fail: check for a wrong error message
-        verify(response).sendError(HttpServletResponse.SC_BAD_REQUEST, "SomeWrongErrorMessage");
+        // Realistic failure: verify correct error sent
+        verify(response, times(1)).sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing orderId");
     }
 
+    // ---------- Test 3: Order not found ----------
+    @Test
+    void testOrderNotFound() throws Exception {
+        when(request.getParameter("orderId")).thenReturn("999");
+        when(orderDAO.getOrderById(999)).thenReturn(null);
 
+        controller.doGet(request, response);
 
-   
-} 
+        verify(orderDAO, times(1)).getOrderById(999);
+        verify(response, times(1)).sendError(HttpServletResponse.SC_NOT_FOUND, "Order not found");
+    }
+}

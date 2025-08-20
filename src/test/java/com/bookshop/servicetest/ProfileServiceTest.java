@@ -49,6 +49,19 @@ class ProfileServiceTest {
         verify(mockDAO, times(1)).getProfile(1);
     }
 
-    // ---------- Test 2: updateProfile ---------- 
-  
+    // ---------- Test 2: updateProfile ----------
+    @Test
+    void testUpdateProfile() throws SQLException {
+        ProfileManage profile = new ProfileManage();
+        profile.setFullname("Jane Doe");
+
+        when(mockDAO.updateProfile(profile)).thenReturn(true);
+
+        boolean updated = profileService.updateProfile(profile);
+
+        assertTrue(updated, "Profile should be updated successfully");
+        verify(mockDAO, times(1)).updateProfile(profile);
+    }
+
+    // Add more tests here following the same pattern
 }

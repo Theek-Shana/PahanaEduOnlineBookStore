@@ -16,7 +16,7 @@ import java.util.List;
 
 import static org.mockito.Mockito.*;
 
-public class ItemControllerTest {
+class ItemControllerTest {
 
     private ItemController controller;
     private ItemService itemService;
@@ -44,7 +44,7 @@ public class ItemControllerTest {
         field.set(controller, itemService);
     }
 
-    // ---------- List Items ----------
+    // ---------- Test: List Items ----------
     @Test
     void testListItems() throws Exception {
         when(request.getParameter("action")).thenReturn("list");
@@ -65,7 +65,7 @@ public class ItemControllerTest {
         verify(dispatcher).forward(request, response);
     }
 
-    // ---------- Show Add Form ----------
+    // ---------- Test: Show Add Form ----------
     @Test
     void testShowAddForm() throws Exception {
         when(request.getParameter("action")).thenReturn("new");
@@ -76,55 +76,42 @@ public class ItemControllerTest {
         verify(dispatcher).forward(request, response);
     }
 
- // ---------- Delete Item (Safe Test) ----------
+    // ---------- Test: Delete Item ----------
     @Test
     void testDeleteItem() throws Exception {
-        // Mock request parameters
         when(request.getParameter("action")).thenReturn("delete");
-        when(request.getParameter("id")).thenReturn("1"); // ID of the item to delete
+        when(request.getParameter("id")).thenReturn("1");
+        when(itemService.deleteItem(1)).thenReturn(true);
 
-        // Mock service behavior
-        when(itemService.deleteItem(1)).thenReturn(true); // simulate successful deletion
-
-        // Call controller
         controller.doGet(request, response);
 
-        // Verify that deleteItem() is called once with correct ID
         verify(itemService, times(1)).deleteItem(1);
-
-        // Verify that the response redirects (to item list page, for example)
         verify(response).sendRedirect(anyString());
     }
 
-
-  
+    // ---------- Test: Add Duplicate Item ----------
     @Test
     void testAddDuplicateItem() throws Exception {
-        // Mock request parameters
-    	when(request.getParameter("action")).thenReturn("add");	
-    	when(request.getParameter("title")).thenReturn("Test Book");	
-    	when(request.getParameter("category")).thenReturn("Test Category");	
-    	when(request.getSession(false)).thenReturn(session);	
-    	when(session.getAttribute("user")).thenReturn(null);	
+        when(request.getParameter("action")).thenReturn("add");
+        when(request.getParameter("title")).thenReturn("Test Book");
+        when(request.getParameter("category")).thenReturn("Test Category");
+        when(request.getSession(false)).thenReturn(session);
+        when(session.getAttribute("user")).thenReturn(null);
+        when(request.getPart("image")).thenReturn(imagePart);
+        when(imagePart.getSize()).thenReturn(1L);
+        when(imagePart.getSubmittedFileName()).thenReturn("fake.jpg");
+        doNothing().when(imagePart).write(anyString());
+        when(itemService.isItemExist("Test Book", "Test Category")).thenReturn(true);
+        when(request.getRequestDispatcher("/view/addItem.jsp")).thenReturn(dispatcher);
 
-    	when(request.getPart("image")).thenReturn(imagePart);
-    	when(imagePart.getSize()).thenReturn(1L);
-    	when(imagePart.getSubmittedFileName()).thenReturn("fake.jpg");
-    	doNothing().when(imagePart).write(anyString());
+        controller.doPost(request, response);
 
-    	when(itemService.isItemExist("Test Book", "Test Category")).thenReturn(true);
-    	when(request.getRequestDispatcher("/view/addItem.jsp")).thenReturn(dispatcher);
-
-    	controller.doPost(request, response);
-
-    	verify(itemService, never()).addItem(any(Item.class));
-    	verify(request).setAttribute(eq("errorMessage"), eq("Item already exists in this category."));
-    	verify(dispatcher).forward(request, response);
+        verify(itemService, never()).addItem(any(Item.class));
+        verify(request).setAttribute(eq("errorMessage"), eq("Item already exists in this category."));
+        verify(dispatcher).forward(request, response);
     }
 
-
-
-    // ---------- Update Item ----------
+    // ---------- Test: Update Item ----------
     @Test
     void testUpdateItem() throws Exception {
         when(request.getParameter("action")).thenReturn("update");
@@ -137,7 +124,6 @@ public class ItemControllerTest {
         when(request.getParameter("category")).thenReturn("Test Cat");
         when(request.getParameter("existingImage")).thenReturn("old.jpg");
         when(request.getRequestDispatcher("/view/editItem.jsp")).thenReturn(dispatcher);
-
         when(itemService.updateItem(any(Item.class))).thenReturn(true);
 
         controller.doPost(request, response);

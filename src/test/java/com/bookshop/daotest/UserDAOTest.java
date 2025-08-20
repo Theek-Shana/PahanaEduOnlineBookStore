@@ -7,6 +7,7 @@ import org.junit.jupiter.api.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,6 +26,14 @@ public class UserDAOTest {
         userDAO = new UserDAO();
         conn = DBConnection.getInstance().getConnection();
         conn.setAutoCommit(false); // Start transaction for safe rollback
+    }
+
+    @BeforeEach
+    void cleanTable() throws SQLException {
+        // Clear users table before each test to avoid duplicates
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute("DELETE FROM users");
+        }
     }
 
     @AfterAll
@@ -53,6 +62,7 @@ public class UserDAOTest {
         // Save this email for potential duplicate test later
         TEST_EMAIL_FOR_DUPLICATE = uniqueEmail;
     }
+
     @Test
     @Order(2)
     public void testRegisterDuplicateUserFails() throws SQLException {
@@ -70,6 +80,4 @@ public class UserDAOTest {
         boolean result = userDAO.registerUser(duplicateUser);
         assertFalse(result, "Duplicate email registration should fail");
     }
- 
-
 }

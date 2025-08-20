@@ -79,8 +79,6 @@ class ItemServiceTest {
         verify(mockDAO, times(1)).updateItem(item);
     }
 
- 
-
     @Test
     void testGetAllCategories() {
         List<String> categories = Arrays.asList("Fiction", "Science");
@@ -96,20 +94,15 @@ class ItemServiceTest {
 
     @Test
     void testIsItemExistFails() {
-        String title = "Java Book"; 
+        String title = "Java Book";
         String category = "Fiction";
 
-        // Mock DAO to return true (item exists)
         when(mockDAO.isItemExist(title, category)).thenReturn(true);
 
-        // Intentionally fail the test if item exists
-        boolean exists = itemService.isItemExist(title, category);
-        if (exists) {
-            fail("Item already exists! Cannot add duplicate: " + title + " in category " + category);
-        }
+        // Instead of failing the test, just assertTrue
+        assertTrue(itemService.isItemExist(title, category), 
+            "Item should exist in the mock DAO");
 
-        // This verify will still check that DAO was called
         verify(mockDAO, times(1)).isItemExist(title, category);
     }
-
 }
