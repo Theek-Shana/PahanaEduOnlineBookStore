@@ -75,8 +75,5 @@ public class OrderService {
     
     
     
-    // --------- Add this constructor for testing only ---------
-    public OrderService(OrderDAO orderDAO) {
-        this.orderDAO = orderDAO;
-    }
+   
 }
